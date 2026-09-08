@@ -43,7 +43,6 @@ let bookings = [];
 // ==========================================
 
 const serviceData = {
-
     "Byte Meeting Room": {
         price: 500,
         duration: 2
@@ -68,7 +67,6 @@ const serviceData = {
         price: 500,
         duration: 1
     }
-
 };
 
 
@@ -77,9 +75,7 @@ const serviceData = {
 // ==========================================
 
 async function loadBookings() {
-
     try {
-
         const snapshot = await getDocs(
             collection(db, "bookings")
         );
@@ -87,25 +83,20 @@ async function loadBookings() {
         bookings = [];
 
         snapshot.forEach((document) => {
-
             bookings.push({
                 id: document.id,
                 ...document.data()
             });
-
         });
 
         renderBookings();
 
     } catch (error) {
-
         console.error(
             "เกิดข้อผิดพลาดในการโหลดข้อมูล:",
             error
         );
-
     }
-
 }
 
 
@@ -114,9 +105,7 @@ async function loadBookings() {
 // ==========================================
 
 function renderBookings() {
-
-    const list =
-        document.getElementById("bookingList");
+    const list = document.getElementById("bookingList");
 
     if (!list) {
         return;
@@ -125,16 +114,13 @@ function renderBookings() {
     list.innerHTML = "";
 
     if (bookings.length === 0) {
-
         list.innerHTML = `
             <p>ยังไม่มีคำขอจอง</p>
         `;
 
         updateDashboard();
-
         return;
     }
-
 
     bookings.forEach((booking) => {
 
@@ -142,24 +128,18 @@ function renderBookings() {
         let statusClass = "";
 
         if (booking.status === "approved") {
-
             statusText = "อนุมัติแล้ว";
             statusClass = "confirmed";
-
         }
 
         if (booking.status === "unavailable") {
-
             statusText = "ไม่ว่าง";
             statusClass = "unavailable";
-
         }
-
 
         let buttons = "";
 
         if (booking.status === "pending") {
-
             buttons = `
                 <div class="buttons">
 
@@ -179,12 +159,9 @@ function renderBookings() {
 
                 </div>
             `;
-
         }
 
-
         list.innerHTML += `
-
             <div class="booking">
 
                 <div>
@@ -217,7 +194,6 @@ function renderBookings() {
 
                 </div>
 
-
                 <div class="status">
 
                     <span class="${statusClass}">
@@ -229,14 +205,10 @@ function renderBookings() {
                 </div>
 
             </div>
-
         `;
-
     });
 
-
     updateDashboard();
-
 }
 
 
@@ -245,7 +217,6 @@ function renderBookings() {
 // ==========================================
 
 async function loadLineMessages() {
-
     try {
 
         const messagesQuery = query(
@@ -253,8 +224,9 @@ async function loadLineMessages() {
             orderBy("createdAt", "desc")
         );
 
-        const snapshot =
-            await getDocs(messagesQuery);
+        const snapshot = await getDocs(
+            messagesQuery
+        );
 
         const list =
             document.getElementById(
@@ -268,7 +240,6 @@ async function loadLineMessages() {
         list.innerHTML = "";
 
         if (snapshot.empty) {
-
             list.innerHTML = `
                 <p>ยังไม่มีข้อความจาก LINE</p>
             `;
@@ -276,14 +247,11 @@ async function loadLineMessages() {
             return;
         }
 
-
         snapshot.forEach((document) => {
 
-            const message =
-                document.data();
+            const message = document.data();
 
             list.innerHTML += `
-
                 <div class="booking">
 
                     <div>
@@ -312,9 +280,7 @@ async function loadLineMessages() {
                     </div>
 
                 </div>
-
             `;
-
         });
 
     } catch (error) {
@@ -325,7 +291,6 @@ async function loadLineMessages() {
         );
 
     }
-
 }
 
 
@@ -365,7 +330,6 @@ function formatDate(date) {
     ];
 
     return `${day} ${thaiMonths[month - 1]} ${year + 543}`;
-
 }
 
 
@@ -395,7 +359,6 @@ async function approveBooking(id) {
         );
 
     }
-
 }
 
 
@@ -425,7 +388,6 @@ async function rejectBooking(id) {
         );
 
     }
-
 }
 
 
@@ -435,44 +397,32 @@ async function rejectBooking(id) {
 
 function updateDashboard() {
 
-    const total =
-        bookings.length;
+    const total = bookings.length;
 
-    const pending =
-        bookings.filter(
-            item => item.status === "pending"
-        ).length;
+    const pending = bookings.filter(
+        item => item.status === "pending"
+    ).length;
 
-    const approved =
-        bookings.filter(
-            item => item.status === "approved"
-        ).length;
+    const approved = bookings.filter(
+        item => item.status === "approved"
+    ).length;
 
-    const unavailable =
-        bookings.filter(
-            item => item.status === "unavailable"
-        ).length;
+    const unavailable = bookings.filter(
+        item => item.status === "unavailable"
+    ).length;
 
 
     const totalElement =
-        document.getElementById(
-            "totalBooking"
-        );
+        document.getElementById("totalBooking");
 
     const pendingElement =
-        document.getElementById(
-            "pendingBooking"
-        );
+        document.getElementById("pendingBooking");
 
     const approvedElement =
-        document.getElementById(
-            "approvedBooking"
-        );
+        document.getElementById("approvedBooking");
 
     const rejectedElement =
-        document.getElementById(
-            "rejectedBooking"
-        );
+        document.getElementById("rejectedBooking");
 
 
     if (totalElement) {
@@ -490,7 +440,6 @@ function updateDashboard() {
     if (rejectedElement) {
         rejectedElement.textContent = unavailable;
     }
-
 }
 
 
@@ -501,9 +450,7 @@ function updateDashboard() {
 function openForm() {
 
     const modal =
-        document.getElementById(
-            "bookingModal"
-        );
+        document.getElementById("bookingModal");
 
     if (!modal) {
         return;
@@ -512,7 +459,6 @@ function openForm() {
     modal.style.display = "flex";
 
     updateServiceInfo();
-
 }
 
 
@@ -523,16 +469,11 @@ function openForm() {
 function closeForm() {
 
     const modal =
-        document.getElementById(
-            "bookingModal"
-        );
+        document.getElementById("bookingModal");
 
     if (modal) {
-
         modal.style.display = "none";
-
     }
-
 }
 
 
@@ -543,19 +484,15 @@ function closeForm() {
 function updateServiceInfo() {
 
     const serviceElement =
-        document.getElementById(
-            "service"
-        );
+        document.getElementById("service");
 
     if (!serviceElement) {
         return;
     }
 
-    const service =
-        serviceElement.value;
+    const service = serviceElement.value;
 
-    const info =
-        serviceData[service];
+    const info = serviceData[service];
 
     if (!info) {
         return;
@@ -563,9 +500,7 @@ function updateServiceInfo() {
 
 
     let infoBox =
-        document.getElementById(
-            "serviceInfo"
-        );
+        document.getElementById("serviceInfo");
 
 
     if (!infoBox) {
@@ -573,50 +508,31 @@ function updateServiceInfo() {
         infoBox =
             document.createElement("div");
 
-        infoBox.id =
-            "serviceInfo";
+        infoBox.id = "serviceInfo";
 
-        infoBox.style.marginTop =
-            "8px";
-
-        infoBox.style.padding =
-            "10px 12px";
-
-        infoBox.style.borderRadius =
-            "8px";
-
-        infoBox.style.background =
-            "#f5f5f5";
-
-        infoBox.style.fontSize =
-            "14px";
+        infoBox.style.marginTop = "8px";
+        infoBox.style.padding = "10px 12px";
+        infoBox.style.borderRadius = "8px";
+        infoBox.style.background = "#f5f5f5";
+        infoBox.style.fontSize = "14px";
 
 
-        serviceElement.parentElement
-            .appendChild(infoBox);
-
+        serviceElement.parentElement.appendChild(
+            infoBox
+        );
     }
 
 
     infoBox.innerHTML = `
-
-        <strong>
-            ${service}
-        </strong>
-
+        <strong>${service}</strong>
         <br>
-
         💰 ${info.price.toLocaleString()} บาท
-
         &nbsp;&nbsp;
-
         ⏱️ ${info.duration} ชั่วโมง
-
     `;
 
 
     updateEndTime();
-
 }
 
 
@@ -627,19 +543,13 @@ function updateServiceInfo() {
 function updateEndTime() {
 
     const serviceElement =
-        document.getElementById(
-            "service"
-        );
+        document.getElementById("service");
 
     const startElement =
-        document.getElementById(
-            "startTime"
-        );
+        document.getElementById("startTime");
 
     const endElement =
-        document.getElementById(
-            "endTime"
-        );
+        document.getElementById("endTime");
 
 
     if (
@@ -657,9 +567,7 @@ function updateEndTime() {
 
 
     const info =
-        serviceData[
-            serviceElement.value
-        ];
+        serviceData[serviceElement.value];
 
     if (!info) {
         return;
@@ -667,13 +575,10 @@ function updateEndTime() {
 
 
     const startMinutes =
-        timeToMinutes(
-            startElement.value
-        );
+        timeToMinutes(startElement.value);
 
     let endMinutes =
-        startMinutes +
-        info.duration * 60;
+        startMinutes + (info.duration * 60);
 
 
     if (endMinutes >= 1440) {
@@ -692,7 +597,6 @@ function updateEndTime() {
         String(hours).padStart(2, "0")
         + ":"
         + String(minutes).padStart(2, "0");
-
 }
 
 
@@ -709,10 +613,7 @@ async function checkTimeConflict(
 
     const snapshot =
         await getDocs(
-            collection(
-                db,
-                "bookings"
-            )
+            collection(db, "bookings")
         );
 
 
@@ -777,16 +678,12 @@ async function checkTimeConflict(
             newStart < existingEnd &&
             newEnd > existingStart
         ) {
-
             return true;
-
         }
-
     }
 
 
     return false;
-
 }
 
 
@@ -805,8 +702,7 @@ function timeToMinutes(time) {
     const minute =
         parseInt(parts[1]);
 
-    return hour * 60 + minute;
-
+    return (hour * 60) + minute;
 }
 
 
@@ -861,7 +757,6 @@ async function addBooking() {
         );
 
         return;
-
     }
 
 
@@ -880,12 +775,6 @@ async function addBooking() {
     const start =
         startElement.value;
 
-    const end =
-        endElement.value;
-
-
-    // ตรวจเฉพาะข้อมูลที่จำเป็น
-    // ไม่ตรวจจำนวนคน
 
     if (
         name === "" ||
@@ -899,18 +788,12 @@ async function addBooking() {
         );
 
         return;
-
     }
 
 
-    // ถ้ายังไม่มีเวลาสิ้นสุด
-    // ให้คำนวณจากบริการ
+    // คำนวณเวลาสิ้นสุดอัตโนมัติ
 
-    if (end === "") {
-
-        updateEndTime();
-
-    }
+    updateEndTime();
 
 
     const finalEnd =
@@ -924,7 +807,6 @@ async function addBooking() {
         );
 
         return;
-
     }
 
 
@@ -938,13 +820,10 @@ async function addBooking() {
         );
 
         return;
-
     }
 
 
     try {
-
-        // ตรวจเวลาชน
 
         const conflict =
             await checkTimeConflict(
@@ -962,7 +841,6 @@ async function addBooking() {
             );
 
             return;
-
         }
 
 
@@ -971,43 +849,30 @@ async function addBooking() {
 
 
         await addDoc(
-            collection(
-                db,
-                "bookings"
-            ),
+            collection(db, "bookings"),
             {
 
-                customerName:
-                    name,
+                customerName: name,
 
-                service:
-                    service,
+                service: service,
 
-                date:
-                    date,
+                date: date,
 
-                startTime:
-                    start,
+                startTime: start,
 
-                endTime:
-                    finalEnd,
+                endTime: finalEnd,
 
-                people:
-                    people,
+                people: people,
 
-                price:
-                    info
-                        ? info.price
-                        : 0,
+                price: info
+                    ? info.price
+                    : 0,
 
-                duration:
-                    info
-                        ? info.duration
-                        : 0,
+                duration: info
+                    ? info.duration
+                    : 0,
 
-                status:
-                    "pending"
-
+                status: "pending"
             }
         );
 
@@ -1039,9 +904,7 @@ async function addBooking() {
         alert(
             "ไม่สามารถบันทึกข้อมูลได้"
         );
-
     }
-
 }
 
 
@@ -1067,12 +930,9 @@ function setupBookingForm() {
         serviceElement.addEventListener(
             "change",
             () => {
-
                 updateServiceInfo();
-
             }
         );
-
     }
 
 
@@ -1081,17 +941,13 @@ function setupBookingForm() {
         startElement.addEventListener(
             "change",
             () => {
-
                 updateEndTime();
-
             }
         );
-
     }
 
 
     updateServiceInfo();
-
 }
 
 
@@ -1099,20 +955,11 @@ function setupBookingForm() {
 // ให้ HTML เรียก Function ได้
 // ==========================================
 
-window.openForm =
-    openForm;
-
-window.closeForm =
-    closeForm;
-
-window.addBooking =
-    addBooking;
-
-window.approveBooking =
-    approveBooking;
-
-window.rejectBooking =
-    rejectBooking;
+window.openForm = openForm;
+window.closeForm = closeForm;
+window.addBooking = addBooking;
+window.approveBooking = approveBooking;
+window.rejectBooking = rejectBooking;
 
 
 // ==========================================
