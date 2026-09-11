@@ -1,11 +1,40 @@
 import express from "express";
 import OpenAI from "openai";
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import fs from "fs";
 
 const app = express();
 
 app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
+
+let serviceAccount;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    serviceAccount = JSON.parse(
+        process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+    );
+} else {
+    serviceAccount = JSON.parse(
+        fs.readFileSync(
+            "./firebase-service-account.json",
+            "utf8"
+        )
+    );
+}
+
+initializeApp({
+    credential: cert(serviceAccount)
+});
+
+const db = getFirestore();
+
+
+// ========================================
+// OpenAI
+// ========================================
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -318,7 +347,8 @@ app.post("/webhook", async (req, res) => {
         const userMessage = event.message.text;
         const replyToken = event.replyToken;
 
-        const userId = event.source?.userId || "unknown-user";
+        const userId =
+            event.source?.userId || "unknown-user";
 
 
         console.log("ลูกค้า:", userMessage);
@@ -347,11 +377,14 @@ app.post("/webhook", async (req, res) => {
 
 
         // ========================================
-        // จำกัดประวัติไม่ให้ยาวเกินไป
+        // จำกัดประวัติ
         // ========================================
 
         if (history.length > 20) {
-            history.splice(0, history.length - 20);
+            history.splice(
+                0,
+                history.length - 20
+            );
         }
 
 
@@ -359,18 +392,22 @@ app.post("/webhook", async (req, res) => {
         // ส่งบทสนทนาให้ AI
         // ========================================
 
-        const response = await openai.responses.create({
+        const response =
+            await openai.responses.create({
 
-            model: "gpt-5.6-luna",
+                model: "gpt-5.6-luna",
 
-            instructions: D_STATION_INFO,
+                instructions:
+                    D_STATION_INFO,
 
-            input: history
+                input:
+                    history
 
-        });
+            });
 
 
-        const aiReply = response.output_text;
+        const aiReply =
+            response.output_text;
 
         console.log("AI:", aiReply);
 
@@ -386,37 +423,197 @@ app.post("/webhook", async (req, res) => {
 
 
         // ========================================
+        // ตรวจว่าข้อมูลการจองครบหรือยัง
+        // ========================================
+
+        if (
+            aiReply.includes("ข้อมูลครบแล้ว") &&
+            aiReply.includes("เบอร์ติดต่อ")
+        ) {
+
+            console.log(
+                "พบข้อมูลการจองครบแล้ว"
+            );
+
+
+            // ========================================
+            // ดึงข้อมูลจากคำตอบ AI
+            // ========================================
+
+            const roomMatch =
+                aiReply.match(
+                    /ห้อง\s*:\s*(.+)/
+                );
+
+            const peopleMatch =
+                aiReply.match(
+                    /จำนวนคน\s*:\s*(.+)/
+                );
+
+            const dateMatch =
+                aiReply.match(
+                    /วันที่\s*:\s*(.+)/
+                );
+
+            const timeMatch =
+                aiReply.match(
+                    /เวลา\s*:\s*(.+)/
+                );
+
+            const nameMatch =
+                aiReply.match(
+                    /ชื่อ\s*:\s*(.+)/
+                );
+
+            const phoneMatch =
+                aiReply.match(
+                    /เบอร์ติดต่อ\s*:\s*(.+)/
+                );
+
+
+            const room =
+                roomMatch
+                    ? roomMatch[1].trim()
+                    : "";
+
+            const people =
+                peopleMatch
+                    ? peopleMatch[1].trim()
+                    : "";
+
+            const date =
+                dateMatch
+                    ? dateMatch[1].trim()
+                    : "";
+
+            const time =
+                timeMatch
+                    ? timeMatch[1].trim()
+                    : "";
+
+            const customerName =
+                nameMatch
+                    ? nameMatch[1].trim()
+                    : "";
+
+            const phone =
+                phoneMatch
+                    ? phoneMatch[1].trim()
+                    : "";
+
+
+            console.log(
+                "ข้อมูลที่เตรียมบันทึก:",
+                {
+                    room,
+                    people,
+                    date,
+                    time,
+                    customerName,
+                    phone
+                }
+            );
+
+
+            // ========================================
+            // บันทึกลง Firestore
+            // ========================================
+
+            await db
+                .collection("bookings")
+                .add({
+
+                    customerName:
+                        customerName,
+
+                    phone:
+                        phone,
+
+                    service:
+                        "ห้องประชุม",
+
+                    room:
+                        room,
+
+                    date:
+                        date,
+
+                    startTime:
+                        time,
+
+                    endTime:
+                        "",
+
+                    people:
+                        people,
+
+                    status:
+                        "pending",
+
+                    lineUserId:
+                        userId,
+
+                    createdAt:
+                        FieldValue.serverTimestamp()
+
+                });
+
+
+            console.log(
+                "บันทึกคำขอจองลง Firebase สำเร็จ"
+            );
+
+        }
+
+
+        // ========================================
         // ส่งคำตอบกลับ LINE
         // ========================================
 
-        const lineResponse = await fetch(
-            "https://api.line.me/v2/bot/message/reply",
-            {
-                method: "POST",
+        const lineResponse =
+            await fetch(
+                "https://api.line.me/v2/bot/message/reply",
+                {
 
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization":
-                        `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
-                },
+                    method: "POST",
 
-                body: JSON.stringify({
-                    replyToken: replyToken,
+                    headers: {
 
-                    messages: [
-                        {
-                            type: "text",
-                            text: aiReply
-                        }
-                    ]
-                })
-            }
-        );
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            replyToken:
+                                replyToken,
+
+                            messages: [
+
+                                {
+                                    type: "text",
+
+                                    text:
+                                        aiReply
+                                }
+
+                            ]
+
+                        })
+
+                }
+            );
 
 
         if (!lineResponse.ok) {
 
-            const lineError = await lineResponse.text();
+            const lineError =
+                await lineResponse.text();
 
             console.error(
                 "LINE API Error:",
@@ -426,14 +623,19 @@ app.post("/webhook", async (req, res) => {
         }
 
 
-        console.log("ส่งคำตอบกลับ LINE สำเร็จ");
+        console.log(
+            "ส่งคำตอบกลับ LINE สำเร็จ"
+        );
 
         res.sendStatus(200);
 
 
     } catch (error) {
 
-        console.error("Error:", error);
+        console.error(
+            "Error:",
+            error
+        );
 
         res.sendStatus(500);
 
@@ -446,10 +648,14 @@ app.post("/webhook", async (req, res) => {
 // Start Server
 // ========================================
 
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
 
-    console.log(
-        `Server running on port ${PORT}`
-    );
+        console.log(
+            `Server running on port ${PORT}`
+        );
 
-});
+    }
+);
