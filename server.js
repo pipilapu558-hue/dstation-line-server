@@ -461,10 +461,20 @@ console.log("CHECK เบอร์โทรศัพท์:", aiReply.includes("
                     /วันที่\s*:\s*(.+)/
                 );
 
-            const timeMatch =
-                aiReply.match(
-                    /เวลา\s*:\s*(.+)/
-                );
+            const startTimeMatch =
+    aiReply.match(
+        /เวลา\s*:\s*(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})/
+    );
+
+const startTime =
+    startTimeMatch
+        ? startTimeMatch[1].trim()
+        : "";
+
+const endTime =
+    startTimeMatch
+        ? startTimeMatch[2].trim()
+        : "";
 
             const nameMatch =
     aiReply.match(
@@ -546,10 +556,10 @@ endTime,
                         date,
 
                     startTime:
-                        time,
+    startTime,
 
-                    endTime:
-                        "",
+endTime:
+    endTime,
 
                     people:
                         people,
