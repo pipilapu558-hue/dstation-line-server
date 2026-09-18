@@ -453,7 +453,7 @@ console.log("CHECK เบอร์โทรศัพท์:", aiReply.includes("
 
             const peopleMatch =
     aiReply.match(
-        /(?:จำนวนคน|จำนวน)\s*:\s*(.+)/
+        /(?:จำนวนคน|จำนวนผู้ใช้บริการ|จำนวน)\s*:\s*(.+)/
     );
 
             const dateMatch =
@@ -467,9 +467,9 @@ console.log("CHECK เบอร์โทรศัพท์:", aiReply.includes("
                 );
 
             const nameMatch =
-                aiReply.match(
-                    /ชื่อ\s*:\s*(.+)/
-                );
+    aiReply.match(
+        /(?:ชื่อผู้จอง|ชื่อ)\s*:\s*(.+)/
+    );
 
             const phoneMatch =
                 aiReply.match(
