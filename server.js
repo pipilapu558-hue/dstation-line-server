@@ -426,6 +426,10 @@ app.post("/webhook", async (req, res) => {
         // ตรวจว่าข้อมูลการจองครบหรือยัง
         // ========================================
 
+        console.log("CHECK ครบแล้ว:", aiReply.includes("ข้อมูลครบแล้ว"));
+console.log("CHECK เบอร์ติดต่อ:", aiReply.includes("เบอร์ติดต่อ"));
+console.log("CHECK เบอร์โทรศัพท์:", aiReply.includes("เบอร์โทรศัพท์"));
+
         if (
             aiReply.includes("ข้อมูลครบแล้ว") &&
             aiReply.includes("เบอร์ติดต่อ")
@@ -508,7 +512,8 @@ app.post("/webhook", async (req, res) => {
                     room,
                     people,
                     date,
-                    time,
+                    startTime,
+endTime,
                     customerName,
                     phone
                 }
