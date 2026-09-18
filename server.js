@@ -431,9 +431,12 @@ console.log("CHECK เบอร์ติดต่อ:", aiReply.includes("เบ
 console.log("CHECK เบอร์โทรศัพท์:", aiReply.includes("เบอร์โทรศัพท์"));
 
         if (
-            aiReply.includes("ข้อมูลครบแล้ว") &&
-            aiReply.includes("เบอร์ติดต่อ")
-        ) {
+    aiReply.includes("ข้อมูลครบแล้ว") &&
+    (
+        aiReply.includes("เบอร์ติดต่อ") ||
+        aiReply.includes("เบอร์โทรศัพท์")
+    )
+) {
 
             console.log(
                 "พบข้อมูลการจองครบแล้ว"
@@ -450,9 +453,9 @@ console.log("CHECK เบอร์โทรศัพท์:", aiReply.includes("
                 );
 
             const peopleMatch =
-                aiReply.match(
-                    /จำนวนคน\s*:\s*(.+)/
-                );
+    aiReply.match(
+        /(?:จำนวนคน|จำนวน)\s*:\s*(.+)/
+    );
 
             const dateMatch =
                 aiReply.match(
