@@ -102,20 +102,19 @@ Co-working Space
 - มีอาหารและเครื่องดื่มให้บริการ
 
 
-กฎการตอบทั่วไป:
+กฎทั่วไป:
 
-- ตอบเป็นภาษาไทย
+- ตอบภาษาไทย
 - สุภาพและเป็นธรรมชาติ
-- ตอบกระชับ เข้าใจง่าย
-- ใช้เฉพาะข้อมูลที่ให้ไว้
-- ห้ามแต่งราคา โปรโมชั่น หรือรายละเอียดบริการขึ้นมาเอง
-- หากไม่ทราบข้อมูล ให้แจ้งลูกค้าว่าสามารถสอบถามพนักงาน D-STATION ได้
+- กระชับ
+- ห้ามแต่งข้อมูล ราคา หรือโปรโมชั่นขึ้นมาเอง
+- หากไม่ทราบข้อมูล ให้แจ้งว่าสามารถสอบถามพนักงาน D-STATION ได้
 
 
 กฎการจองห้องประชุม:
 
-เมื่อรู้ว่าลูกค้าต้องการจองห้องประชุม
-ให้ถามข้อมูลการจองทั้งหมดในคำถามเดียว
+เมื่อลูกค้าต้องการจองห้องประชุม
+ให้ถามข้อมูลทั้งหมดในข้อความเดียว
 
 ให้ถามว่า:
 
@@ -131,15 +130,6 @@ Co-working Space
 หากยังไม่แน่ใจว่าควรใช้ห้องไหน แจ้งจำนวนคนมาได้เลยค่ะ เดี๋ยวช่วยแนะนำห้องให้ค่ะ"
 
 
-เมื่อลูกค้าตอบข้อมูลกลับมา:
-
-- ตรวจสอบข้อมูลจากบทสนทนาทั้งหมด
-- จดจำข้อมูลที่ลูกค้าเคยให้ไว้
-- ใช้ข้อมูลล่าสุดหากลูกค้าแก้ไขข้อมูล
-- ถ้าข้อมูลยังไม่ครบ ให้ถามเฉพาะข้อมูลที่ยังขาด
-- ห้ามถามข้อมูลที่ลูกค้าให้มาแล้ว
-
-
 ข้อมูลที่ต้องมี:
 
 1. ชื่อ
@@ -150,22 +140,28 @@ Co-working Space
 6. เวลาสิ้นสุด
 
 
+หากข้อมูลยังไม่ครบ:
+ให้ถามเฉพาะข้อมูลที่ยังขาด
+
+ห้ามถามข้อมูลที่ลูกค้าให้มาแล้ว
+
+
 เมื่อข้อมูลครบ:
 
 4-6 คน:
-เลือก Byte Meeting Room
-ราคา 500 บาท / 2 ชั่วโมง
+Byte Meeting Room
+500 บาท / 2 ชั่วโมง
 
 7-10 คน:
-เลือก Pixel Meeting Room
-ราคา 800 บาท / 2 ชั่วโมง
+Pixel Meeting Room
+800 บาท / 2 ชั่วโมง
 
 12-30 คน:
-เลือก Nexus Meeting Room
-ราคา 1,000 บาท / 2 ชั่วโมง
+Nexus Meeting Room
+1,000 บาท / 2 ชั่วโมง
 
 
-ให้สรุปข้อมูลในรูปแบบนี้เท่านั้น:
+ให้สรุปข้อมูลดังนี้:
 
 ข้อมูลการจอง
 
@@ -179,11 +175,7 @@ Co-working Space
 ข้อมูลครบแล้วค่ะ ขณะนี้เป็นคำขอจอง
 รอพนักงาน D-STATION ตรวจสอบและยืนยันการจองนะคะ
 
-
-สำคัญมาก:
-
-เมื่อข้อมูลครบ ให้ใส่ข้อความนี้ในคำตอบด้วย:
-
+เมื่อข้อมูลครบ ต้องมีคำว่า:
 ข้อมูลครบแล้วค่ะ
 
 ห้ามบอกว่าจองสำเร็จแล้ว
@@ -200,6 +192,172 @@ app.get("/", (req, res) => {
     res.send(
         "D-STATION LINE Webhook Server is running!"
     );
+
+});
+
+
+// ========================================
+// ส่งข้อความยืนยันการจองกลับ LINE
+// ========================================
+
+app.post("/send-confirmation", async (req, res) => {
+
+    try {
+
+        const bookingId =
+            req.body?.bookingId;
+
+        if (!bookingId) {
+
+            return res.status(400).json({
+                success: false,
+                message: "ไม่มี bookingId"
+            });
+
+        }
+
+
+        const bookingDoc =
+            await db
+                .collection("bookings")
+                .doc(bookingId)
+                .get();
+
+
+        if (!bookingDoc.exists) {
+
+            return res.status(404).json({
+                success: false,
+                message: "ไม่พบข้อมูลการจอง"
+            });
+
+        }
+
+
+        const booking =
+            bookingDoc.data();
+
+
+        if (!booking.lineUserId) {
+
+            return res.status(400).json({
+                success: false,
+                message: "ไม่พบ LINE User ID ของลูกค้า"
+            });
+
+        }
+
+
+        // ========================================
+        // ข้อความยืนยัน
+        // ========================================
+
+        const confirmationMessage =
+`ยืนยันการจองห้องประชุมค่ะ 🎉
+
+ห้อง: ${booking.room}
+จำนวนคน: ${booking.people} คน
+วันที่: ${booking.date}
+เวลา: ${booking.startTime} - ${booking.endTime}
+ชื่อผู้จอง: ${booking.customerName}
+
+การจองได้รับการยืนยันเรียบร้อยแล้วค่ะ
+ขอบคุณที่ใช้บริการ D-STATION นครสวรรค์ค่ะ 😊`;
+
+
+        // ========================================
+        // ส่ง LINE Push Message
+        // ========================================
+
+        const lineResponse =
+            await fetch(
+                "https://api.line.me/v2/bot/message/push",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            to:
+                                booking.lineUserId,
+
+                            messages: [
+
+                                {
+                                    type: "text",
+
+                                    text:
+                                        confirmationMessage
+                                }
+
+                            ]
+
+                        })
+
+                }
+            );
+
+
+        if (!lineResponse.ok) {
+
+            const lineError =
+                await lineResponse.text();
+
+            console.error(
+                "LINE Push Error:",
+                lineError
+            );
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "ส่งข้อความ LINE ไม่สำเร็จ"
+
+            });
+
+        }
+
+
+        console.log(
+            "ส่งข้อความยืนยันกลับ LINE สำเร็จ"
+        );
+
+
+        res.json({
+            success: true
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "Confirmation Error:",
+            error
+        );
+
+        res.status(500).json({
+
+            success: false,
+
+            message:
+                "เกิดข้อผิดพลาด"
+
+        });
+
+    }
 
 });
 
@@ -273,8 +431,12 @@ app.post("/webhook", async (req, res) => {
 
 
         history.push({
+
             role: "user",
-            content: userMessage
+
+            content:
+                userMessage
+
         });
 
 
@@ -317,13 +479,17 @@ app.post("/webhook", async (req, res) => {
 
 
         history.push({
+
             role: "assistant",
-            content: aiReply
+
+            content:
+                aiReply
+
         });
 
 
         // ========================================
-        // ตรวจว่าถามเรื่องห้องประชุมหรือไม่
+        // ตรวจเรื่องห้องประชุม
         // ========================================
 
         const isMeetingRoomQuestion =
@@ -332,11 +498,13 @@ app.post("/webhook", async (req, res) => {
 
 
         // ========================================
-        // ตรวจว่าข้อมูลจองครบหรือไม่
+        // ตรวจข้อมูลครบ
         // ========================================
 
         const bookingComplete =
-            aiReply.includes("ข้อมูลครบแล้วค่ะ") &&
+            aiReply.includes(
+                "ข้อมูลครบแล้วค่ะ"
+            ) &&
             aiReply.includes("ห้อง:") &&
             aiReply.includes("จำนวนคน:") &&
             aiReply.includes("วันที่:") &&
@@ -352,10 +520,6 @@ app.post("/webhook", async (req, res) => {
 
 
         if (bookingComplete) {
-
-            // ========================================
-            // ดึงข้อมูลจาก AI
-            // ========================================
 
             const roomMatch =
                 aiReply.match(
@@ -439,7 +603,7 @@ app.post("/webhook", async (req, res) => {
 
 
             // ========================================
-            // สร้าง Key ป้องกันการบันทึกซ้ำ
+            // ป้องกันการบันทึกซ้ำ
             // ========================================
 
             const bookingKey =
@@ -450,10 +614,6 @@ app.post("/webhook", async (req, res) => {
                 savedBookings.get(userId) ===
                 bookingKey;
 
-
-            // ========================================
-            // ตรวจข้อมูลครบจริง
-            // ========================================
 
             if (
                 room &&
@@ -519,7 +679,7 @@ app.post("/webhook", async (req, res) => {
             } else {
 
                 console.log(
-                    "ข้อมูลยังไม่ครบ หรือบันทึกไปแล้ว"
+                    "ข้อมูลไม่ครบ หรือบันทึกไปแล้ว"
                 );
 
             }
@@ -528,14 +688,17 @@ app.post("/webhook", async (req, res) => {
 
 
         // ========================================
-        // เตรียมข้อความส่ง LINE
+        // เตรียมข้อความ LINE
         // ========================================
 
         const messages = [
 
             {
                 type: "text",
-                text: aiReply
+
+                text:
+                    aiReply
+
             }
 
         ];
