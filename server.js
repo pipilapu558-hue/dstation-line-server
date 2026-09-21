@@ -583,61 +583,90 @@ endTime:
         }
 
 
-        // ========================================
-        // ส่งคำตอบกลับ LINE
-        // ========================================
+       // ========================================
+// ส่งคำตอบกลับ LINE
+// ========================================
 
-        const lineResponse =
-            await fetch(
-                "https://api.line.me/v2/bot/message/reply",
-                {
+// ตรวจว่าลูกค้ากำลังถามเรื่องห้องประชุมหรือไม่
+const isMeetingRoomQuestion =
+    /ห้องประชุม|ห้องประชุมให้เช่า|เช่าห้องประชุม|จองห้องประชุม|ห้องประชุมมี|ห้องประชุมราคา|ห้องประชุมกี่คน/
+        .test(userMessage);
 
-                    method: "POST",
+const messages = [
+    {
+        type: "text",
+        text: aiReply
+    }
+];
 
-                    headers: {
+// ถ้าลูกค้าถามเรื่องห้องประชุม → ส่งรูปรายละเอียดห้องให้ด้วย
+if (isMeetingRoomQuestion) {
 
-                        "Content-Type":
-                            "application/json",
+    messages.push({
+        type: "image",
 
-                        "Authorization":
-                            `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
+        originalContentUrl:
+            "https://i.postimg.cc/7wKx749d/line-oa-chat-260831-104118.jpg",
 
-                    },
+        previewImageUrl:
+            "https://i.postimg.cc/7wKx749d/line-oa-chat-260831-104118.jpg"
+    });
 
-                    body:
-                        JSON.stringify({
-
-                            replyToken:
-                                replyToken,
-
-                            messages: [
-
-                                {
-                                    type: "text",
-
-                                    text:
-                                        aiReply
-                                }
-
-                            ]
-
-                        })
-
-                }
-            );
+}
 
 
-        if (!lineResponse.ok) {
+// ========================================
+// ส่งข้อความกลับ LINE
+// ========================================
 
-            const lineError =
-                await lineResponse.text();
+const lineResponse =
+    await fetch(
+        "https://api.line.me/v2/bot/message/reply",
+        {
 
-            console.error(
-                "LINE API Error:",
-                lineError
-            );
+            method: "POST",
+
+            headers: {
+
+                "Content-Type":
+                    "application/json",
+
+                "Authorization":
+                    `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
+
+            },
+
+            body:
+                JSON.stringify({
+
+                    replyToken:
+                        replyToken,
+
+                    messages:
+                        messages
+
+                })
 
         }
+    );
+
+
+if (!lineResponse.ok) {
+
+    const lineError =
+        await lineResponse.text();
+
+    console.error(
+        "LINE API Error:",
+        lineError
+    );
+
+}
+
+
+console.log(
+    "ส่งคำตอบกลับ LINE สำเร็จ"
+);
 
 
         console.log(
