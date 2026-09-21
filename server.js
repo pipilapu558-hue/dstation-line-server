@@ -1,3 +1,4 @@
+```javascript
 import express from "express";
 import OpenAI from "openai";
 import { initializeApp, cert } from "firebase-admin/app";
@@ -9,6 +10,11 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
+
+
+// ========================================
+// Firebase
+// ========================================
 
 let serviceAccount;
 
@@ -42,12 +48,16 @@ const openai = new OpenAI({
 
 
 // ========================================
-// เก็บประวัติการคุยของลูกค้าแต่ละคน
+// เก็บประวัติการคุยของลูกค้า
 // ========================================
 
 const conversations = new Map();
 
-// เก็บรายการจองที่บันทึกไปแล้วของลูกค้า
+
+// ========================================
+// ป้องกันการบันทึกการจองซ้ำ
+// ========================================
+
 const savedBookings = new Map();
 
 
@@ -105,14 +115,14 @@ Co-working Space
 - หากไม่ทราบข้อมูล ให้แจ้งลูกค้าว่าสามารถสอบถามพนักงาน D-STATION ได้
 
 
-// ========================================
-// กฎการจองห้องประชุม
-// ========================================
+========================================
+กฎการจองห้องประชุม
+========================================
 
 เมื่อรู้ว่าลูกค้าต้องการจองห้องประชุม
-ให้เก็บข้อมูลการจองให้ครบในข้อความเดียว
+ให้ถามข้อมูลการจองทั้งหมดในคำถามเดียว
 
-ให้ถามลูกค้าเพียงคำถามเดียวว่า:
+ให้ถามว่า:
 
 "ได้เลยค่ะ 😊 หากต้องการจองห้องประชุม รบกวนแจ้งข้อมูลในข้อความเดียวได้เลยนะคะ
 
@@ -127,28 +137,11 @@ Co-working Space
 
 
 ========================================
-กฎการเลือกห้อง
-========================================
-
-ถ้าจำนวนคน 4-6 คน:
-แนะนำ Byte Meeting Room
-ราคา 500 บาท / 2 ชั่วโมง
-
-ถ้าจำนวนคน 7-10 คน:
-แนะนำ Pixel Meeting Room
-ราคา 800 บาท / 2 ชั่วโมง
-
-ถ้าจำนวนคน 12-30 คน:
-แนะนำ Nexus Meeting Room
-ราคา 1,000 บาท / 2 ชั่วโมง
-
-
-========================================
-กฎการตรวจข้อมูล
+การตรวจข้อมูล
 ========================================
 
 เมื่อลูกค้าตอบกลับมา
-ให้ตรวจสอบข้อมูลทั้งหมดจากข้อความของลูกค้า
+ให้ตรวจสอบข้อมูลทั้งหมดจากบทสนทนา
 
 ข้อมูลที่ต้องมี:
 
@@ -160,11 +153,29 @@ Co-working Space
 6. เวลาสิ้นสุด
 
 
-ถ้าข้อมูลครบ:
-ให้เลือกห้องตามจำนวนคน
-แล้วสรุปข้อมูลการจอง
+หากข้อมูลยังไม่ครบ:
+ให้ถามเฉพาะข้อมูลที่ยังขาด
 
-รูปแบบสรุปต้องเป็น:
+ห้ามถามข้อมูลที่ลูกค้าให้มาแล้ว
+
+
+หากข้อมูลครบ:
+ให้เลือกห้องตามจำนวนคน
+
+4-6 คน:
+Byte Meeting Room
+500 บาท / 2 ชั่วโมง
+
+7-10 คน:
+Pixel Meeting Room
+800 บาท / 2 ชั่วโมง
+
+12-30 คน:
+Nexus Meeting Room
+1,000 บาท / 2 ชั่วโมง
+
+
+จากนั้นให้สรุปข้อมูลในรูปแบบนี้:
 
 ข้อมูลการจอง
 
@@ -179,26 +190,17 @@ Co-working Space
 รอพนักงาน D-STATION ตรวจสอบและยืนยันการจองนะคะ
 
 
-ถ้าข้อมูลยังไม่ครบ:
-ให้ถามเฉพาะข้อมูลที่ยังขาด
-
-ห้ามถามข้อมูลที่ลูกค้าให้มาแล้ว
-
-ห้ามบอกว่าจองสำเร็จแล้ว
-
-หากลูกค้าให้ข้อมูลหลายอย่างมาในข้อความเดียว
-ต้องจดจำข้อมูลทั้งหมดจากข้อความนั้น
-
-หากลูกค้าเปลี่ยนข้อมูล
-ให้ใช้ข้อมูลล่าสุด
-
-
 ========================================
-รูปแบบข้อมูลที่ AI ต้องใช้
+กฎสำคัญ
 ========================================
 
-เมื่อข้อมูลครบแล้ว
-ต้องใช้หัวข้อเหล่านี้แบบตรงตัว:
+- ห้ามบอกว่าจองสำเร็จแล้ว
+- ห้ามบอกว่าห้องว่างแน่นอน
+- ห้ามถามข้อมูลหลายรอบ
+- หากลูกค้าให้ข้อมูลหลายอย่างในข้อความเดียว ให้เก็บข้อมูลทั้งหมด
+- หากลูกค้าเปลี่ยนข้อมูล ให้ใช้ข้อมูลล่าสุด
+- ถ้าข้อมูลยังไม่ครบ ให้ถามเฉพาะข้อมูลที่ขาด
+- เมื่อข้อมูลครบ ต้องใช้หัวข้อเหล่านี้แบบตรงตัว:
 
 ห้อง:
 จำนวนคน:
@@ -206,9 +208,7 @@ Co-working Space
 เวลา:
 ชื่อ:
 เบอร์ติดต่อ:
-
-ห้ามเปลี่ยนชื่อหัวข้อเหล่านี้
-เพราะระบบหลังบ้านใช้ข้อมูลเหล่านี้ในการบันทึกลง Firebase
+`;
 
 
 // ========================================
@@ -217,7 +217,9 @@ Co-working Space
 
 app.get("/", (req, res) => {
 
-    res.send("D-STATION LINE Webhook Server is running!");
+    res.send(
+        "D-STATION LINE Webhook Server is running!"
+    );
 
 });
 
@@ -235,7 +237,8 @@ app.post("/webhook", async (req, res) => {
 
     try {
 
-        const event = req.body?.events?.[0];
+        const event =
+            req.body?.events?.[0];
 
         if (!event) {
             return res.sendStatus(200);
@@ -250,26 +253,43 @@ app.post("/webhook", async (req, res) => {
         }
 
 
-        const userMessage = event.message.text;
-        const replyToken = event.replyToken;
+        const userMessage =
+            event.message.text;
+
+        const replyToken =
+            event.replyToken;
 
         const userId =
-            event.source?.userId || "unknown-user";
+            event.source?.userId ||
+            "unknown-user";
 
 
-        console.log("ลูกค้า:", userMessage);
-        console.log("LINE User ID:", userId);
+        console.log(
+            "ลูกค้า:",
+            userMessage
+        );
+
+        console.log(
+            "LINE User ID:",
+            userId
+        );
 
 
         // ========================================
-        // สร้างประวัติของลูกค้า
+        // สร้างประวัติ
         // ========================================
 
         if (!conversations.has(userId)) {
-            conversations.set(userId, []);
+
+            conversations.set(
+                userId,
+                []
+            );
+
         }
 
-        const history = conversations.get(userId);
+        const history =
+            conversations.get(userId);
 
 
         // ========================================
@@ -277,8 +297,12 @@ app.post("/webhook", async (req, res) => {
         // ========================================
 
         history.push({
+
             role: "user",
-            content: userMessage
+
+            content:
+                userMessage
+
         });
 
 
@@ -287,15 +311,17 @@ app.post("/webhook", async (req, res) => {
         // ========================================
 
         if (history.length > 20) {
+
             history.splice(
                 0,
                 history.length - 20
             );
+
         }
 
 
         // ========================================
-        // ส่งบทสนทนาให้ AI
+        // ส่งให้ AI
         // ========================================
 
         const response =
@@ -315,7 +341,11 @@ app.post("/webhook", async (req, res) => {
         const aiReply =
             response.output_text;
 
-        console.log("AI:", aiReply);
+
+        console.log(
+            "AI:",
+            aiReply
+        );
 
 
         // ========================================
@@ -323,297 +353,333 @@ app.post("/webhook", async (req, res) => {
         // ========================================
 
         history.push({
+
             role: "assistant",
-            content: aiReply
+
+            content:
+                aiReply
+
         });
 
 
         // ========================================
-// ตรวจว่าข้อมูลการจองครบหรือยัง
-// ========================================
-
-const bookingComplete =
-    aiReply.includes("ข้อมูลครบแล้วค่ะ") &&
-    aiReply.includes("ห้อง:") &&
-    aiReply.includes("จำนวนคน:") &&
-    aiReply.includes("วันที่:") &&
-    aiReply.includes("เวลา:") &&
-    aiReply.includes("ชื่อ:") &&
-    aiReply.includes("เบอร์ติดต่อ:");
-
-console.log(
-    "CHECK ข้อมูลการจองครบ:",
-    bookingComplete
-);
-
-
-if (bookingComplete) {
-
-    console.log(
-        "พบข้อมูลการจองครบแล้ว"
-    );
-
-
-    // ========================================
-    // ดึงข้อมูลจากคำตอบ AI
-    // ========================================
-
-    const roomMatch =
-        aiReply.match(
-            /ห้อง\s*:\s*(.+)/
-        );
-
-    const peopleMatch =
-        aiReply.match(
-            /จำนวนคน\s*:\s*(.+)/
-        );
-
-    const dateMatch =
-        aiReply.match(
-            /วันที่\s*:\s*(.+)/
-        );
-
-    const startTimeMatch =
-        aiReply.match(
-            /เวลา\s*:\s*(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})/
-        );
-
-    const nameMatch =
-        aiReply.match(
-            /ชื่อ\s*:\s*(.+)/
-        );
-
-    const phoneMatch =
-        aiReply.match(
-            /เบอร์ติดต่อ\s*:\s*(.+)/
-        );
-
-
-    const room =
-        roomMatch
-            ? roomMatch[1].trim()
-            : "";
-
-    const people =
-        peopleMatch
-            ? peopleMatch[1].trim()
-            : "";
-
-    const date =
-        dateMatch
-            ? dateMatch[1].trim()
-            : "";
-
-    const startTime =
-        startTimeMatch
-            ? startTimeMatch[1].trim()
-            : "";
-
-    const endTime =
-        startTimeMatch
-            ? startTimeMatch[2].trim()
-            : "";
-
-    const customerName =
-        nameMatch
-            ? nameMatch[1].trim()
-            : "";
-
-    const phone =
-        phoneMatch
-            ? phoneMatch[1].trim()
-            : "";
-
-
-    console.log(
-        "ข้อมูลที่เตรียมบันทึก:",
-        {
-            room,
-            people,
-            date,
-            startTime,
-            endTime,
-            customerName,
-            phone
-        }
-    );
-
-
-    // ========================================
-    // ตรวจว่าข้อมูลสำคัญครบจริงหรือไม่
-    // ========================================
-
-    const bookingKey =
-    `${userId}|${room}|${date}|${startTime}|${endTime}|${phone}`;
-
-const alreadySaved =
-    savedBookings.get(userId) === bookingKey;
-
-
-if (
-    room &&
-    people &&
-    date &&
-    startTime &&
-    endTime &&
-    customerName &&
-    phone &&
-    !alreadySaved
-) {
-
-        // ========================================
-        // บันทึกลง Firestore
+        // ตรวจว่าลูกค้าถามเรื่องห้องประชุมหรือไม่
         // ========================================
 
-        await db
-            .collection("bookings")
-            .add({
+        const isMeetingRoomQuestion =
+            /ห้องประชุม|เช่าห้องประชุม|จองห้องประชุม|รายละเอียดห้องประชุม|ห้องประชุมมี|ห้องประชุมราคา/
+                .test(userMessage);
 
-                customerName:
-                    customerName,
 
-                phone:
-                    phone,
+        // ========================================
+        // ตรวจข้อมูลการจองครบ
+        // ========================================
 
-                service:
-                    "ห้องประชุม",
+        const bookingComplete =
+            aiReply.includes(
+                "ข้อมูลครบแล้วค่ะ"
+            ) &&
+            aiReply.includes(
+                "ห้อง:"
+            ) &&
+            aiReply.includes(
+                "จำนวนคน:"
+            ) &&
+            aiReply.includes(
+                "วันที่:"
+            ) &&
+            aiReply.includes(
+                "เวลา:"
+            ) &&
+            aiReply.includes(
+                "ชื่อ:"
+            ) &&
+            aiReply.includes(
+                "เบอร์ติดต่อ:"
+            );
 
-                room:
+
+        console.log(
+            "CHECK ข้อมูลการจองครบ:",
+            bookingComplete
+        );
+
+
+        if (bookingComplete) {
+
+            // ========================================
+            // ดึงข้อมูลจาก AI
+            // ========================================
+
+            const roomMatch =
+                aiReply.match(
+                    /ห้อง\s*:\s*(.+)/
+                );
+
+            const peopleMatch =
+                aiReply.match(
+                    /จำนวนคน\s*:\s*(.+)/
+                );
+
+            const dateMatch =
+                aiReply.match(
+                    /วันที่\s*:\s*(.+)/
+                );
+
+            const startTimeMatch =
+                aiReply.match(
+                    /เวลา\s*:\s*(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})/
+                );
+
+            const nameMatch =
+                aiReply.match(
+                    /ชื่อ\s*:\s*(.+)/
+                );
+
+            const phoneMatch =
+                aiReply.match(
+                    /เบอร์ติดต่อ\s*:\s*(.+)/
+                );
+
+
+            const room =
+                roomMatch
+                    ? roomMatch[1].trim()
+                    : "";
+
+            const people =
+                peopleMatch
+                    ? peopleMatch[1].trim()
+                    : "";
+
+            const date =
+                dateMatch
+                    ? dateMatch[1].trim()
+                    : "";
+
+            const startTime =
+                startTimeMatch
+                    ? startTimeMatch[1].trim()
+                    : "";
+
+            const endTime =
+                startTimeMatch
+                    ? startTimeMatch[2].trim()
+                    : "";
+
+            const customerName =
+                nameMatch
+                    ? nameMatch[1].trim()
+                    : "";
+
+            const phone =
+                phoneMatch
+                    ? phoneMatch[1].trim()
+                    : "";
+
+
+            console.log(
+                "ข้อมูลที่เตรียมบันทึก:",
+                {
                     room,
-
-                date:
-                    date,
-
-                startTime:
-                    startTime,
-
-                endTime:
-                    endTime,
-
-                people:
                     people,
+                    date,
+                    startTime,
+                    endTime,
+                    customerName,
+                    phone
+                }
+            );
 
-                status:
-                    "pending",
 
-                lineUserId:
+            // ========================================
+            // สร้างรหัสป้องกันการบันทึกซ้ำ
+            // ========================================
+
+            const bookingKey =
+                `${userId}|${room}|${date}|${startTime}|${endTime}|${phone}`;
+
+
+            const alreadySaved =
+                savedBookings.get(userId) ===
+                bookingKey;
+
+
+            // ========================================
+            // ตรวจข้อมูลครบจริง
+            // ========================================
+
+            if (
+                room &&
+                people &&
+                date &&
+                startTime &&
+                endTime &&
+                customerName &&
+                phone &&
+                !alreadySaved
+            ) {
+
+                // ========================================
+                // บันทึก Firebase
+                // ========================================
+
+                await db
+                    .collection("bookings")
+                    .add({
+
+                        customerName:
+                            customerName,
+
+                        phone:
+                            phone,
+
+                        service:
+                            "ห้องประชุม",
+
+                        room:
+                            room,
+
+                        date:
+                            date,
+
+                        startTime:
+                            startTime,
+
+                        endTime:
+                            endTime,
+
+                        people:
+                            people,
+
+                        status:
+                            "pending",
+
+                        lineUserId:
+                            userId,
+
+                        createdAt:
+                            FieldValue.serverTimestamp()
+
+                    });
+
+
+                savedBookings.set(
                     userId,
+                    bookingKey
+                );
 
-                createdAt:
-                    FieldValue.serverTimestamp()
+
+                console.log(
+                    "บันทึกคำขอจองลง Firebase สำเร็จ"
+                );
+
+            } else {
+
+                console.log(
+                    "ข้อมูลไม่ครบ หรือบันทึกไปแล้ว"
+                );
+
+            }
+
+        }
+
+
+        // ========================================
+        // เตรียมข้อความส่งกลับ LINE
+        // ========================================
+
+        const messages = [
+
+            {
+
+                type:
+                    "text",
+
+                text:
+                    aiReply
+
+            }
+
+        ];
+
+
+        // ========================================
+        // ถ้าถามเรื่องห้องประชุม → ส่งรูป
+        // ========================================
+
+        if (isMeetingRoomQuestion) {
+
+            messages.push({
+
+                type:
+                    "image",
+
+                originalContentUrl:
+                    "https://i.postimg.cc/7wKx749d/line-oa-chat-260831-104118.jpg",
+
+                previewImageUrl:
+                    "https://i.postimg.cc/7wKx749d/line-oa-chat-260831-104118.jpg"
 
             });
 
-
-        console.log(
-            "บันทึกคำขอจองลง Firebase สำเร็จ"
-        );
-
-        savedBookings.set(
-    userId,
-    bookingKey
-);
-
-    } else {
-
-        console.log(
-            "ข้อมูลการจองยังไม่ครบ จึงยังไม่บันทึก Firebase"
-        );
-
-    }
-
-}
+        }
 
 
-       // ========================================
-// ส่งคำตอบกลับ LINE
-// ========================================
+        // ========================================
+        // ส่งกลับ LINE
+        // ========================================
 
-// ตรวจว่าลูกค้ากำลังถามเรื่องห้องประชุมหรือไม่
-const isMeetingRoomQuestion =
-    /ห้องประชุม|ห้องประชุมให้เช่า|เช่าห้องประชุม|จองห้องประชุม|ห้องประชุมมี|ห้องประชุมราคา|ห้องประชุมกี่คน/
-        .test(userMessage);
+        const lineResponse =
+            await fetch(
+                "https://api.line.me/v2/bot/message/reply",
+                {
 
-const messages = [
-    {
-        type: "text",
-        text: aiReply
-    }
-];
+                    method:
+                        "POST",
 
-// ถ้าลูกค้าถามเรื่องห้องประชุม → ส่งรูปรายละเอียดห้องให้ด้วย
-if (isMeetingRoomQuestion) {
+                    headers: {
 
-    messages.push({
-        type: "image",
+                        "Content-Type":
+                            "application/json",
 
-        originalContentUrl:
-            "https://i.postimg.cc/7wKx749d/line-oa-chat-260831-104118.jpg",
+                        "Authorization":
+                            `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
 
-        previewImageUrl:
-            "https://i.postimg.cc/7wKx749d/line-oa-chat-260831-104118.jpg"
-    });
+                    },
 
-}
+                    body:
+                        JSON.stringify({
+
+                            replyToken:
+                                replyToken,
+
+                            messages:
+                                messages
+
+                        })
+
+                }
+            );
 
 
-// ========================================
-// ส่งข้อความกลับ LINE
-// ========================================
+        if (!lineResponse.ok) {
 
-const lineResponse =
-    await fetch(
-        "https://api.line.me/v2/bot/message/reply",
-        {
+            const lineError =
+                await lineResponse.text();
 
-            method: "POST",
-
-            headers: {
-
-                "Content-Type":
-                    "application/json",
-
-                "Authorization":
-                    `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
-
-            },
-
-            body:
-                JSON.stringify({
-
-                    replyToken:
-                        replyToken,
-
-                    messages:
-                        messages
-
-                })
+            console.error(
+                "LINE API Error:",
+                lineError
+            );
 
         }
-    );
-
-
-if (!lineResponse.ok) {
-
-    const lineError =
-        await lineResponse.text();
-
-    console.error(
-        "LINE API Error:",
-        lineError
-    );
-
-}
-
-
-console.log(
-    "ส่งคำตอบกลับ LINE สำเร็จ"
-);
 
 
         console.log(
             "ส่งคำตอบกลับ LINE สำเร็จ"
         );
+
 
         res.sendStatus(200);
 
@@ -647,3 +713,4 @@ app.listen(
 
     }
 );
+```
