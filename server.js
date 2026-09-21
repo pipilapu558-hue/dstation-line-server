@@ -6,6 +6,11 @@ import fs from "fs";
 
 const app = express();
 
+
+// ========================================
+// CORS
+// ========================================
+
 app.use((req, res, next) => {
     res.header(
         "Access-Control-Allow-Origin",
@@ -29,6 +34,7 @@ app.use((req, res, next) => {
     next();
 });
 
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
@@ -41,21 +47,27 @@ const PORT = process.env.PORT || 10000;
 let serviceAccount;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+
     serviceAccount = JSON.parse(
         process.env.FIREBASE_SERVICE_ACCOUNT_JSON
     );
+
 } else {
+
     serviceAccount = JSON.parse(
         fs.readFileSync(
             "./firebase-service-account.json",
             "utf8"
         )
     );
+
 }
+
 
 initializeApp({
     credential: cert(serviceAccount)
 });
+
 
 const db = getFirestore();
 
@@ -203,6 +215,12 @@ Nexus Meeting Room
 
 ห้ามบอกว่าจองสำเร็จแล้ว
 ห้ามบอกว่าห้องว่างแน่นอน
+
+สำคัญ:
+เมื่อสรุปเวลา ให้เขียนในบรรทัด "เวลา:" เป็นรูปแบบ:
+เวลา: 10:00 - 12:00
+
+ไม่ต้องใส่คำว่า "น." หลังเวลา
 `;
 
 
@@ -229,6 +247,13 @@ app.post("/send-confirmation", async (req, res) => {
 
         const bookingId =
             req.body?.bookingId;
+
+
+        console.log(
+            "ได้รับคำขอส่งข้อความยืนยัน:",
+            bookingId
+        );
+
 
         if (!bookingId) {
 
@@ -261,6 +286,19 @@ app.post("/send-confirmation", async (req, res) => {
             bookingDoc.data();
 
 
+        console.log(
+            "ข้อมูลการจองที่จะส่ง LINE:",
+            {
+                room: booking.room,
+                people: booking.people,
+                date: booking.date,
+                startTime: booking.startTime,
+                endTime: booking.endTime,
+                hasLineUserId: !!booking.lineUserId
+            }
+        );
+
+
         if (!booking.lineUserId) {
 
             return res.status(400).json({
@@ -279,7 +317,7 @@ app.post("/send-confirmation", async (req, res) => {
 `ยืนยันการจองห้องประชุมค่ะ 🎉
 
 ห้อง: ${booking.room}
-จำนวนคน: ${booking.people} คน
+จำนวนคน: ${booking.people}
 วันที่: ${booking.date}
 เวลา: ${booking.startTime} - ${booking.endTime}
 ชื่อผู้จอง: ${booking.customerName}
@@ -342,6 +380,7 @@ app.post("/send-confirmation", async (req, res) => {
                 lineError
             );
 
+
             return res.status(500).json({
 
                 success: false,
@@ -371,6 +410,7 @@ app.post("/send-confirmation", async (req, res) => {
             error
         );
 
+
         res.status(500).json({
 
             success: false,
@@ -396,18 +436,22 @@ app.post("/webhook", async (req, res) => {
         JSON.stringify(req.body, null, 2)
     );
 
+
     try {
 
         const event =
             req.body?.events?.[0];
 
+
         if (!event) {
             return res.sendStatus(200);
         }
 
+
         if (event.type !== "message") {
             return res.sendStatus(200);
         }
+
 
         if (event.message?.type !== "text") {
             return res.sendStatus(200);
@@ -417,8 +461,10 @@ app.post("/webhook", async (req, res) => {
         const userMessage =
             event.message.text;
 
+
         const replyToken =
             event.replyToken;
+
 
         const userId =
             event.source?.userId ||
@@ -429,6 +475,7 @@ app.post("/webhook", async (req, res) => {
             "ลูกค้า:",
             userMessage
         );
+
 
         console.log(
             "LINE User ID:",
@@ -448,6 +495,7 @@ app.post("/webhook", async (req, res) => {
             );
 
         }
+
 
         const history =
             conversations.get(userId);
@@ -544,34 +592,43 @@ app.post("/webhook", async (req, res) => {
 
         if (bookingComplete) {
 
+            // ========================================
+            // ดึงข้อมูลจาก AI
+            // ========================================
+
             const roomMatch =
                 aiReply.match(
-                    /ห้อง\s*:\s*(.+)/
+                    /ห้อง\s*:\s*([^\n\r]+)/
                 );
+
 
             const peopleMatch =
                 aiReply.match(
-                    /จำนวนคน\s*:\s*(.+)/
+                    /จำนวนคน\s*:\s*([^\n\r]+)/
                 );
+
 
             const dateMatch =
                 aiReply.match(
-                    /วันที่\s*:\s*(.+)/
+                    /วันที่\s*:\s*([^\n\r]+)/
                 );
+
 
             const timeMatch =
                 aiReply.match(
-                    /เวลา\s*:\s*(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})/
+                    /เวลา\s*:\s*(\d{1,2})\s*[:.]\s*(\d{2})\s*(?:น\.)?\s*[-–—]\s*(\d{1,2})\s*[:.]\s*(\d{2})\s*(?:น\.)?/
                 );
+
 
             const nameMatch =
                 aiReply.match(
-                    /ชื่อ\s*:\s*(.+)/
+                    /ชื่อ\s*:\s*([^\n\r]+)/
                 );
+
 
             const phoneMatch =
                 aiReply.match(
-                    /เบอร์ติดต่อ\s*:\s*(.+)/
+                    /เบอร์ติดต่อ\s*:\s*([^\n\r]+)/
                 );
 
 
@@ -580,30 +637,40 @@ app.post("/webhook", async (req, res) => {
                     ? roomMatch[1].trim()
                     : "";
 
+
             const people =
                 peopleMatch
                     ? peopleMatch[1].trim()
                     : "";
+
 
             const date =
                 dateMatch
                     ? dateMatch[1].trim()
                     : "";
 
-            const startTime =
-                timeMatch
-                    ? timeMatch[1].trim()
-                    : "";
 
-            const endTime =
-                timeMatch
-                    ? timeMatch[2].trim()
-                    : "";
+            let startTime = "";
+
+            let endTime = "";
+
+
+            if (timeMatch) {
+
+                startTime =
+                    `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`;
+
+                endTime =
+                    `${timeMatch[3].padStart(2, "0")}:${timeMatch[4]}`;
+
+            }
+
 
             const customerName =
                 nameMatch
                     ? nameMatch[1].trim()
                     : "";
+
 
             const phone =
                 phoneMatch
@@ -649,44 +716,45 @@ app.post("/webhook", async (req, res) => {
                 !alreadySaved
             ) {
 
-                await db
-                    .collection("bookings")
-                    .add({
+                const bookingRef =
+                    await db
+                        .collection("bookings")
+                        .add({
 
-                        customerName:
-                            customerName,
+                            customerName:
+                                customerName,
 
-                        phone:
-                            phone,
+                            phone:
+                                phone,
 
-                        service:
-                            "ห้องประชุม",
+                            service:
+                                "ห้องประชุม",
 
-                        room:
-                            room,
+                            room:
+                                room,
 
-                        date:
-                            date,
+                            date:
+                                date,
 
-                        startTime:
-                            startTime,
+                            startTime:
+                                startTime,
 
-                        endTime:
-                            endTime,
+                            endTime:
+                                endTime,
 
-                        people:
-                            people,
+                            people:
+                                people,
 
-                        status:
-                            "pending",
+                            status:
+                                "pending",
 
-                        lineUserId:
-                            userId,
+                            lineUserId:
+                                userId,
 
-                        createdAt:
-                            FieldValue.serverTimestamp()
+                            createdAt:
+                                FieldValue.serverTimestamp()
 
-                    });
+                        });
 
 
                 savedBookings.set(
@@ -696,7 +764,8 @@ app.post("/webhook", async (req, res) => {
 
 
                 console.log(
-                    "บันทึกคำขอจองลง Firebase สำเร็จ"
+                    "บันทึกคำขอจองลง Firebase สำเร็จ:",
+                    bookingRef.id
                 );
 
             } else {
