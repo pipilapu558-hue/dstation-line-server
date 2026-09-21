@@ -503,9 +503,9 @@ const endTime =
                     : "";
 
             const time =
-                timeMatch
-                    ? timeMatch[1].trim()
-                    : "";
+    startTimeMatch
+        ? startTimeMatch[1].trim()
+        : "";
 
             const customerName =
                 nameMatch
