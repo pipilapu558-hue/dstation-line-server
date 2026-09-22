@@ -11,16 +11,11 @@ const app = express();
 // ========================================
 
 app.use((req, res, next) => {
-    res.header(
-        "Access-Control-Allow-Origin",
-        "*"
-    );
-
+    res.header("Access-Control-Allow-Origin", "*");
     res.header(
         "Access-Control-Allow-Methods",
         "GET,POST,PUT,DELETE,OPTIONS"
     );
-
     res.header(
         "Access-Control-Allow-Headers",
         "Content-Type, Authorization"
@@ -87,7 +82,6 @@ const savedBookings = new Map();
 // ========================================
 
 const IMAGES = {
-
     coworking:
         "https://i.ibb.co/7Jxd0r4f/message-Image-1789295654187.jpg",
 
@@ -105,7 +99,6 @@ const IMAGES = {
 
     podcast:
         "https://i.ibb.co/HDmWC5mb/Gemini-Generated-Image-2odn1q2odn1q2odn.jpg"
-
 };
 
 // ========================================
@@ -176,6 +169,9 @@ LINE OA:
 Podcast Studio
 ========================================
 
+ชื่อบริการ:
+Podcast Studio
+
 ราคา:
 500 บาท / 1 ชั่วโมง
 
@@ -183,13 +179,18 @@ Podcast Studio
 จอง 1 ชั่วโมง แถมฟรี 1 ชั่วโมง
 
 มีอุปกรณ์พร้อมใช้งาน
-เหมาะสำหรับ Podcast
-สัมภาษณ์
-และสร้างคอนเทนต์
+
+เหมาะสำหรับ:
+- Podcast
+- สัมภาษณ์
+- สร้างคอนเทนต์
 
 ========================================
 Live Studio
 ========================================
+
+ชื่อบริการ:
+Live Studio
 
 ราคา:
 500 บาท / 1 ชั่วโมง
@@ -213,10 +214,12 @@ Co-working Space
 ========================================
 
 มีพื้นที่สำหรับนั่งทำงาน
+
 มี Wi-Fi
 มีปลั๊กไฟ
 บรรยากาศสงบ
 เหมาะกับการทำงานและอ่านหนังสือ
+
 มีอาหารและเครื่องดื่มให้บริการ
 
 ค่าใช้บริการ:
@@ -237,16 +240,27 @@ Monthly Pass:
 ========================================
 
 D-STATION มีอาหารให้บริการ
-หากลูกค้าถามเมนูอาหาร
-ให้แจ้งว่ามีเมนูอาหารและส่งรูปเมนูอาหารให้ลูกค้าก่อนข้อความ
+
+หากลูกค้าถามเมนูอาหาร:
+- ให้แจ้งว่ามีเมนูอาหาร
+- ให้ส่งรูปเมนูอาหาร
+- สามารถบอกลูกค้าให้ดูรายละเอียดเมนูและราคาได้จากรูป
+
+ห้ามตอบว่าไม่มีข้อมูลเกี่ยวกับอาหาร
+หากลูกค้าขอทั้งอาหารและเครื่องดื่ม ให้ตอบว่าสามารถดูได้ทั้งสองเมนู
 
 ========================================
 เครื่องดื่ม
 ========================================
 
 D-STATION มีเครื่องดื่มให้บริการ
-หากลูกค้าถามเมนูเครื่องดื่ม
-ให้ส่งรูปเมนูเครื่องดื่มก่อนข้อความ
+
+หากลูกค้าถามเมนูเครื่องดื่ม:
+- ให้แจ้งว่ามีเมนูเครื่องดื่ม
+- ให้ส่งรูปเมนูเครื่องดื่ม
+- สามารถบอกลูกค้าให้ดูรายละเอียดเมนูและราคาได้จากรูป
+
+ห้ามตอบว่าไม่มีข้อมูลเกี่ยวกับเครื่องดื่ม
 
 ========================================
 กฎการตอบ
@@ -258,21 +272,57 @@ D-STATION มีเครื่องดื่มให้บริการ
 - กระชับ
 - ตอบเฉพาะข้อมูลของ D-STATION
 - ห้ามแต่งราคา ข้อมูล หรือโปรโมชั่นขึ้นมาเอง
-- หากไม่มีข้อมูล ให้บอกว่าไม่ทราบข้อมูลนี้ และแนะนำให้สอบถามพนักงาน D-STATION
-- หากลูกค้าถามเรื่องที่ไม่เกี่ยวกับ D-STATION เช่น การบ้าน เกม ข่าวทั่วไป สูตรอาหาร หรือเรื่องอื่น ๆ ให้ตอบกลับอย่างสุภาพว่า:
+
+หากไม่มีข้อมูล ให้บอกว่าไม่ทราบข้อมูลนี้
+และแนะนำให้สอบถามพนักงาน D-STATION
+
+หากลูกค้าถามเรื่องที่ไม่เกี่ยวกับ D-STATION เช่น
+การบ้าน เกม ข่าวทั่วไป สูตรอาหาร หรือเรื่องอื่น ๆ
+ให้ตอบว่า:
 
 "ขออภัยค่ะ เรื่องนี้ไม่มีข้อมูลอยู่ในระบบของ D-STATION ค่ะ หากต้องการสอบถามข้อมูลเกี่ยวกับ D-STATION สามารถถามได้เลยนะคะ 😊"
 
-ห้ามเงียบและห้ามไม่ตอบลูกค้า
+ห้ามเงียบ
+ห้ามไม่ตอบลูกค้า
 
 ========================================
-การจองห้องประชุม
+สำคัญเกี่ยวกับการจอง
 ========================================
 
-เมื่อเริ่มต้นที่ลูกค้าต้องการจองห้องประชุม
+หากลูกค้าพูดว่าต้องการ:
+- จอง
+- ขอจอง
+- ต้องการจองห้อง
+- จองห้องประชุม
+- จองห้อง Live
+- จองห้องไลฟ์
+- จอง Podcast
+- จองห้อง Podcast
+- จองห้องพอดแคสต์
+
+ให้ถือว่าลูกค้าต้องการ "จองบริการ"
+
+ห้ามตอบเฉพาะโปรโมชั่น
+ห้ามส่งเฉพาะข้อมูลราคา
+ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+
+========================================
+การจองห้อง
+========================================
+
+สามารถจองบริการเหล่านี้ได้:
+
+1. Byte Meeting Room
+2. Pixel Meeting Room
+3. Nexus Meeting Room
+4. Podcast Studio
+5. Live Studio
+
+เมื่อเริ่มต้นที่ลูกค้าต้องการจองห้อง
 ให้ใช้ข้อความนี้ EXACTLY:
 
 เบื้องต้น รบกวนขออนุญาตขอข้อมูลเพื่อทำการจองห้องล่วงหน้าค่ะ
+
 ชื่อผู้ติดต่อ :
 ตำแหน่ง :
 จากหน่วยงาน/บริษัท :
@@ -301,11 +351,20 @@ D-STATION มีเครื่องดื่มให้บริการ
 หากข้อมูลยังไม่ครบ
 ให้ถามเฉพาะข้อมูลที่ยังขาด
 
-หากลูกค้าระบุจำนวนคน
-ให้ช่วยเลือกห้องให้ตามนี้:
+หากลูกค้าต้องการจอง Podcast Studio
+ให้ใช้ห้อง:
+Podcast Studio
+
+หากลูกค้าต้องการจอง Live Studio
+ให้ใช้ห้อง:
+Live Studio
+
+หากลูกค้าต้องการจองห้องประชุม:
 
 4-6 คน = Byte Meeting Room
+
 7-10 คน = Pixel Meeting Room
+
 12-30 คน = Nexus Meeting Room
 
 หากจำนวนคนไม่อยู่ในช่วงที่กำหนด
@@ -320,13 +379,19 @@ D-STATION มีเครื่องดื่มให้บริการ
 ข้อมูลการจอง
 
 ห้อง: [ชื่อห้อง]
+
 จำนวนคน: [จำนวนคน]
+
 วันที่: [วันที่]
+
 เวลา: [เวลาเริ่ม] - [เวลาสิ้นสุด]
+
 ชื่อ: [ชื่อผู้ติดต่อ]
+
 เบอร์ติดต่อ: [เบอร์]
 
 ข้อมูลครบแล้วค่ะ ขณะนี้เป็นคำขอจอง
+
 รอพนักงาน D-STATION ตรวจสอบและยืนยันการจองนะคะ
 
 สำคัญ:
@@ -338,11 +403,9 @@ D-STATION มีเครื่องดื่มให้บริการ
 ห้ามบอกว่าห้องว่างแน่นอน
 
 รูปแบบเวลาต้องเป็น:
-
 เวลา: 10:00 - 12:00
 
 ไม่ต้องใส่คำว่า "น." หลังเวลา
-
 `;
 
 // ========================================
@@ -356,7 +419,7 @@ app.get("/", (req, res) => {
 });
 
 // ========================================
-// ฟังก์ชันสร้าง Image Message
+// สร้าง Image Message
 // ========================================
 
 function createImageMessage(url) {
@@ -372,11 +435,8 @@ function createImageMessage(url) {
 // ========================================
 
 app.post("/send-confirmation", async (req, res) => {
-
     try {
-
-        const bookingId =
-            req.body?.bookingId;
+        const bookingId = req.body?.bookingId;
 
         console.log(
             "ได้รับคำขอส่งข้อความยืนยัน:",
@@ -384,12 +444,10 @@ app.post("/send-confirmation", async (req, res) => {
         );
 
         if (!bookingId) {
-
             return res.status(400).json({
                 success: false,
                 message: "ไม่มี bookingId"
             });
-
         }
 
         const bookingDoc =
@@ -399,16 +457,13 @@ app.post("/send-confirmation", async (req, res) => {
                 .get();
 
         if (!bookingDoc.exists) {
-
             return res.status(404).json({
                 success: false,
                 message: "ไม่พบข้อมูลการจอง"
             });
-
         }
 
-        const booking =
-            bookingDoc.data();
+        const booking = bookingDoc.data();
 
         console.log(
             "ข้อมูลการจองที่จะส่ง LINE:",
@@ -423,16 +478,14 @@ app.post("/send-confirmation", async (req, res) => {
         );
 
         if (!booking.lineUserId) {
-
             return res.status(400).json({
                 success: false,
                 message: "ไม่พบ LINE User ID ของลูกค้า"
             });
-
         }
 
         const confirmationMessage =
-`ยืนยันการจองห้องประชุมค่ะ 🎉
+`ยืนยันการจองค่ะ 🎉
 
 ห้อง: ${booking.room}
 
@@ -453,20 +506,16 @@ app.post("/send-confirmation", async (req, res) => {
                 "https://api.line.me/v2/bot/message/push",
                 {
                     method: "POST",
-
                     headers: {
                         "Content-Type":
                             "application/json",
-
                         "Authorization":
                             `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
                     },
-
                     body:
                         JSON.stringify({
                             to:
                                 booking.lineUserId,
-
                             messages: [
                                 {
                                     type: "text",
@@ -479,7 +528,6 @@ app.post("/send-confirmation", async (req, res) => {
             );
 
         if (!lineResponse.ok) {
-
             const lineError =
                 await lineResponse.text();
 
@@ -493,7 +541,6 @@ app.post("/send-confirmation", async (req, res) => {
                 message:
                     "ส่งข้อความ LINE ไม่สำเร็จ"
             });
-
         }
 
         console.log(
@@ -516,9 +563,7 @@ app.post("/send-confirmation", async (req, res) => {
             message:
                 "เกิดข้อผิดพลาด"
         });
-
     }
-
 });
 
 // ========================================
@@ -558,7 +603,7 @@ app.post("/webhook", async (req, res) => {
         );
 
         // ========================================
-        // กรณี Sticker
+        // Sticker
         // ========================================
 
         if (event.message?.type === "sticker") {
@@ -574,20 +619,16 @@ app.post("/webhook", async (req, res) => {
                     "https://api.line.me/v2/bot/message/reply",
                     {
                         method: "POST",
-
                         headers: {
                             "Content-Type":
                                 "application/json",
-
                             "Authorization":
                                 `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
                         },
-
                         body:
                             JSON.stringify({
                                 replyToken:
                                     replyToken,
-
                                 messages: [
                                     stickerReply
                                 ]
@@ -596,19 +637,17 @@ app.post("/webhook", async (req, res) => {
                 );
 
             if (!stickerResponse.ok) {
-
                 console.error(
                     "LINE Sticker Reply Error:",
                     await stickerResponse.text()
                 );
-
             }
 
             return res.sendStatus(200);
         }
 
         // ========================================
-        // รับเฉพาะข้อความ Text
+        // รับเฉพาะ Text
         // ========================================
 
         if (event.message?.type !== "text") {
@@ -624,16 +663,54 @@ app.post("/webhook", async (req, res) => {
         );
 
         // ========================================
+        // ตรวจประเภทคำถาม
+        // ========================================
+
+        const isBookingRequest =
+            /จอง|ขอจอง|ต้องการจอง|จองห้อง|ทำการจอง|booking/i
+                .test(userMessage);
+
+        const isPodcastQuestion =
+            /พอดแคสต์|podcast|พอคแคสต์|ห้องอัด|ห้องพอดแคสต์/i
+                .test(userMessage);
+
+        const isLiveQuestion =
+            /ห้องไลฟ์|ไลฟ์สด|live studio|live|ไลฟ์/i
+                .test(userMessage);
+
+        const isMeetingRoomQuestion =
+            /ห้องประชุม|เช่าห้องประชุม|จองห้องประชุม|รายละเอียดห้องประชุม|ห้องประชุมมี|ห้องประชุมราคา|Byte|Pixel|Nexus/i
+                .test(userMessage);
+
+        const isCoworkingQuestion =
+            /co-working|co working|coworking|โคเวิร์กกิ้ง|co-work|พื้นที่ทำงาน|พื้นที่นั่งทำงาน|ค่าใช้จ่าย.*ทำงาน|ค่าบริการ.*ทำงาน/i
+                .test(userMessage);
+
+        const isFoodQuestion =
+            /เมนูอาหาร|อาหาร|กินอะไร|มีอาหารอะไร|ราคาอาหาร|เมนู.*กิน/i
+                .test(userMessage);
+
+        const isDrinkQuestion =
+            /เมนูเครื่องดื่ม|เครื่องดื่ม|กาแฟ|น้ำ|เครื่องดื่มมีอะไร|ราคาน้ำ|เมนู.*น้ำ/i
+                .test(userMessage);
+
+        // ========================================
+        // ตรวจว่าขออาหาร + เครื่องดื่มพร้อมกัน
+        // ========================================
+
+        const isFoodAndDrinkQuestion =
+            isFoodQuestion &&
+            isDrinkQuestion;
+
+        // ========================================
         // สร้างประวัติ
         // ========================================
 
         if (!conversations.has(userId)) {
-
             conversations.set(
                 userId,
                 []
             );
-
         }
 
         const history =
@@ -646,12 +723,60 @@ app.post("/webhook", async (req, res) => {
         });
 
         if (history.length > 20) {
-
             history.splice(
                 0,
                 history.length - 20
             );
+        }
 
+        // ========================================
+        // คำสั่งเพิ่มเติมให้ AI ตามคำถามปัจจุบัน
+        // ========================================
+
+        let currentInstruction = "";
+
+        if (isBookingRequest) {
+
+            if (isPodcastQuestion) {
+
+                currentInstruction = `
+คำสั่งสำคัญสำหรับข้อความล่าสุด:
+ลูกค้าต้องการ "จอง Podcast Studio"
+นี่คือคำขอจอง ไม่ใช่การถามโปรโมชั่น
+ห้ามตอบเฉพาะโปรโมชั่น
+ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+กำหนดห้องเป็น "Podcast Studio"
+`;
+
+            } else if (isLiveQuestion) {
+
+                currentInstruction = `
+คำสั่งสำคัญสำหรับข้อความล่าสุด:
+ลูกค้าต้องการ "จอง Live Studio"
+นี่คือคำขอจอง ไม่ใช่การถามโปรโมชั่น
+ห้ามตอบเฉพาะโปรโมชั่น
+ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+กำหนดห้องเป็น "Live Studio"
+`;
+
+            } else if (isMeetingRoomQuestion) {
+
+                currentInstruction = `
+คำสั่งสำคัญสำหรับข้อความล่าสุด:
+ลูกค้าต้องการจองห้องประชุม
+ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+ห้ามตอบเฉพาะโปรโมชั่น
+`;
+
+            } else {
+
+                currentInstruction = `
+คำสั่งสำคัญสำหรับข้อความล่าสุด:
+ลูกค้าต้องการจองบริการของ D-STATION
+ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจอง
+ห้ามตอบเฉพาะโปรโมชั่น
+`;
+            }
         }
 
         // ========================================
@@ -665,11 +790,12 @@ app.post("/webhook", async (req, res) => {
                     "gpt-5.6-luna",
 
                 instructions:
-                    D_STATION_INFO,
+                    D_STATION_INFO +
+                    "\n\n" +
+                    currentInstruction,
 
                 input:
                     history
-
             });
 
         const aiReply =
@@ -685,34 +811,6 @@ app.post("/webhook", async (req, res) => {
             content:
                 aiReply
         });
-
-        // ========================================
-        // ตรวจประเภทคำถามเพื่อส่งรูป
-        // ========================================
-
-        const isMeetingRoomQuestion =
-            /ห้องประชุม|เช่าห้องประชุม|จองห้องประชุม|รายละเอียดห้องประชุม|ห้องประชุมมี|ห้องประชุมราคา|Byte|Pixel|Nexus/i
-                .test(userMessage);
-
-        const isPodcastQuestion =
-            /พอดแคสต์|podcast|พอคแคสต์|ห้องอัด|ห้องพอดแคสต์/i
-                .test(userMessage);
-
-        const isLiveQuestion =
-            /ห้องไลฟ์|ไลฟ์สด|live studio|live|ไลฟ์/i
-                .test(userMessage);
-
-        const isCoworkingQuestion =
-            /co-working|co working|coworking|โคเวิร์กกิ้ง|co-work|พื้นที่ทำงาน|พื้นที่นั่งทำงาน|ค่าใช้จ่าย.*ทำงาน|ค่าบริการ.*ทำงาน/i
-                .test(userMessage);
-
-        const isFoodQuestion =
-            /เมนูอาหาร|อาหาร|กินอะไร|มีอาหารอะไร|ราคาอาหาร/i
-                .test(userMessage);
-
-        const isDrinkQuestion =
-            /เมนูเครื่องดื่ม|เครื่องดื่ม|กาแฟ|น้ำ|เครื่องดื่มมีอะไร|ราคาน้ำ/i
-                .test(userMessage);
 
         // ========================================
         // ตรวจข้อมูลการจองครบ
@@ -735,55 +833,93 @@ app.post("/webhook", async (req, res) => {
         );
 
         // ========================================
+        // ฟังก์ชันดึงข้อมูลจาก Summary
+        // ========================================
+
+        function getField(text, fieldName) {
+
+            const regex =
+                new RegExp(
+                    `${fieldName}\\s*:\\s*([^\\n\\r]+)`,
+                    "i"
+                );
+
+            const match =
+                text.match(regex);
+
+            return match
+                ? match[1].trim()
+                : "";
+        }
+
+        // ========================================
         // บันทึก Booking
         // ========================================
 
         if (bookingComplete) {
 
-            const roomMatch =
-                aiReply.match(
-                    /ห้อง\s*:\s*([^\n\r]+)/
+            const room =
+                getField(
+                    aiReply,
+                    "ห้อง"
                 );
 
-            const peopleMatch =
-                aiReply.match(
-                    /จำนวนคน\s*:\s*([^\n\r]+)/
+            const people =
+                getField(
+                    aiReply,
+                    "จำนวนคน"
                 );
 
-            const dateMatch =
-                aiReply.match(
-                    /วันที่\s*:\s*([^\n\r]+)/
+            const date =
+                getField(
+                    aiReply,
+                    "วันที่"
                 );
+
+            const customerName =
+                getField(
+                    aiReply,
+                    "ชื่อ"
+                );
+
+            const phone =
+                getField(
+                    aiReply,
+                    "เบอร์ติดต่อ"
+                );
+
+            const position =
+                getField(
+                    aiReply,
+                    "ตำแหน่ง"
+                );
+
+            const company =
+                getField(
+                    aiReply,
+                    "จากหน่วยงาน/บริษัท"
+                );
+
+            const address =
+                getField(
+                    aiReply,
+                    "ที่อยู่"
+                );
+
+            const email =
+                getField(
+                    aiReply,
+                    "อีเมล"
+                );
+
+            // ========================================
+            // เวลา
+            // ========================================
 
             const timeMatch =
                 aiReply.match(
-                    /เวลา\s*:\s*(\d{1,2})\s*[:.]\s*(\d{2})\s*[-–—]\s*(\d{1,2})\s*[:.]\s*(\d{2})/
+                    /เวลา\s*:\s*(\d{1,2})\s*[:.]\s*(\d{2})\s*(?:น\.)?\s*[-–—]\s*(\d{1,2})\s*[:.]\s*(\d{2})\s*(?:น\.)?/i
                 );
-
-            const nameMatch =
-                aiReply.match(
-                    /ชื่อ\s*:\s*([^\n\r]+)/
-                );
-
-            const phoneMatch =
-                aiReply.match(
-                    /เบอร์ติดต่อ\s*:\s*([^\n\r]+)/
-                );
-
-            const room =
-                roomMatch
-                    ? roomMatch[1].trim()
-                    : "";
-
-            const people =
-                peopleMatch
-                    ? peopleMatch[1].trim()
-                    : "";
-
-            const date =
-                dateMatch
-                    ? dateMatch[1].trim()
-                    : "";
 
             let startTime = "";
             let endTime = "";
@@ -795,67 +931,36 @@ app.post("/webhook", async (req, res) => {
 
                 endTime =
                     `${timeMatch[3].padStart(2, "0")}:${timeMatch[4]}`;
-
             }
 
-            const customerName =
-                nameMatch
-                    ? nameMatch[1].trim()
-                    : "";
-
-            const phone =
-                phoneMatch
-                    ? phoneMatch[1].trim()
-                    : "";
-
             // ========================================
-            // ดึงข้อมูลจากแบบฟอร์มเพิ่มเติม
+            // ระบุ Service
             // ========================================
 
-            const positionMatch =
-                aiReply.match(
-                    /ตำแหน่ง\s*:\s*([^\n\r]+)/
-                );
+            let service = "ห้องประชุม";
 
-            const companyMatch =
-                aiReply.match(
-                    /จากหน่วยงาน\/บริษัท\s*:\s*([^\n\r]+)/
-                );
+            if (
+                /Podcast Studio/i.test(room) ||
+                /พอดแคสต์/i.test(room)
+            ) {
 
-            const addressMatch =
-                aiReply.match(
-                    /ที่อยู่\s*:\s*([^\n\r]+)/
-                );
+                service =
+                    "Podcast Studio";
 
-            const emailMatch =
-                aiReply.match(
-                    /อีเมล\s*:\s*([^\n\r]+)/
-                );
+            } else if (
+                /Live Studio/i.test(room) ||
+                /ไลฟ์/i.test(room)
+            ) {
 
-            const position =
-                positionMatch
-                    ? positionMatch[1].trim()
-                    : "";
-
-            const company =
-                companyMatch
-                    ? companyMatch[1].trim()
-                    : "";
-
-            const address =
-                addressMatch
-                    ? addressMatch[1].trim()
-                    : "";
-
-            const email =
-                emailMatch
-                    ? emailMatch[1].trim()
-                    : "";
+                service =
+                    "Live Studio";
+            }
 
             console.log(
                 "ข้อมูลที่เตรียมบันทึก:",
                 {
                     room,
+                    service,
                     people,
                     date,
                     startTime,
@@ -874,7 +979,7 @@ app.post("/webhook", async (req, res) => {
             // ========================================
 
             const bookingKey =
-                `${userId}|${room}|${date}|${startTime}|${endTime}|${phone}`;
+                `${userId}|${service}|${room}|${date}|${startTime}|${endTime}|${phone}`;
 
             const alreadySaved =
                 savedBookings.get(userId) ===
@@ -919,7 +1024,7 @@ app.post("/webhook", async (req, res) => {
                                 email,
 
                             service:
-                                "ห้องประชุม",
+                                service,
 
                             room:
                                 room,
@@ -944,7 +1049,6 @@ app.post("/webhook", async (req, res) => {
 
                             createdAt:
                                 FieldValue.serverTimestamp()
-
                         });
 
                 savedBookings.set(
@@ -962,9 +1066,7 @@ app.post("/webhook", async (req, res) => {
                 console.log(
                     "ข้อมูลไม่ครบ หรือบันทึกไปแล้ว"
                 );
-
             }
-
         }
 
         // ========================================
@@ -974,52 +1076,12 @@ app.post("/webhook", async (req, res) => {
 
         const messages = [];
 
-        // ห้องประชุม
-        if (isMeetingRoomQuestion) {
+        // ========================================
+        // อาหาร + เครื่องดื่ม
+        // ต้องส่ง 2 รูป
+        // ========================================
 
-            messages.push(
-                createImageMessage(
-                    IMAGES.meeting
-                )
-            );
-
-        }
-
-        // Podcast
-        else if (isPodcastQuestion) {
-
-            messages.push(
-                createImageMessage(
-                    IMAGES.podcast
-                )
-            );
-
-        }
-
-        // Live
-        else if (isLiveQuestion) {
-
-            messages.push(
-                createImageMessage(
-                    IMAGES.live
-                )
-            );
-
-        }
-
-        // Co-working
-        else if (isCoworkingQuestion) {
-
-            messages.push(
-                createImageMessage(
-                    IMAGES.coworking
-                )
-            );
-
-        }
-
-        // อาหาร
-        else if (isFoodQuestion) {
+        if (isFoodAndDrinkQuestion) {
 
             messages.push(
                 createImageMessage(
@@ -1027,17 +1089,101 @@ app.post("/webhook", async (req, res) => {
                 )
             );
 
+            messages.push(
+                createImageMessage(
+                    IMAGES.drinks
+                )
+            );
         }
 
+        // ========================================
+        // ห้องประชุม
+        // ========================================
+
+        else if (
+            isMeetingRoomQuestion
+        ) {
+
+            messages.push(
+                createImageMessage(
+                    IMAGES.meeting
+                )
+            );
+        }
+
+        // ========================================
+        // Podcast
+        // ========================================
+
+        else if (
+            isPodcastQuestion
+        ) {
+
+            messages.push(
+                createImageMessage(
+                    IMAGES.podcast
+                )
+            );
+        }
+
+        // ========================================
+        // Live
+        // ========================================
+
+        else if (
+            isLiveQuestion
+        ) {
+
+            messages.push(
+                createImageMessage(
+                    IMAGES.live
+                )
+            );
+        }
+
+        // ========================================
+        // Co-working
+        // ========================================
+
+        else if (
+            isCoworkingQuestion
+        ) {
+
+            messages.push(
+                createImageMessage(
+                    IMAGES.coworking
+                )
+            );
+        }
+
+        // ========================================
+        // อาหาร
+        // ========================================
+
+        else if (
+            isFoodQuestion
+        ) {
+
+            messages.push(
+                createImageMessage(
+                    IMAGES.food
+                )
+            );
+        }
+
+        // ========================================
         // เครื่องดื่ม
-        else if (isDrinkQuestion) {
+        // ========================================
+
+        else if (
+            isDrinkQuestion
+        ) {
 
             messages.push(
                 createImageMessage(
                     IMAGES.drinks
                 )
             );
-
         }
 
         // ========================================
@@ -1070,13 +1216,11 @@ app.post("/webhook", async (req, res) => {
 
                     body:
                         JSON.stringify({
-
                             replyToken:
                                 replyToken,
 
                             messages:
                                 messages
-
                         })
                 }
             );
@@ -1090,7 +1234,6 @@ app.post("/webhook", async (req, res) => {
                 "LINE API Error:",
                 lineError
             );
-
         }
 
         console.log(
@@ -1107,9 +1250,7 @@ app.post("/webhook", async (req, res) => {
         );
 
         res.sendStatus(500);
-
     }
-
 });
 
 // ========================================
@@ -1124,6 +1265,5 @@ app.listen(
         console.log(
             `Server running on port ${PORT}`
         );
-
     }
 );
