@@ -72,16 +72,22 @@ const openai = new OpenAI({
 const conversations = new Map();
 
 // ========================================
+// จำว่าลูกค้ากำลังจองบริการอะไร
+// ========================================
+
+const bookingModes = new Map();
+
+// ========================================
 // ป้องกันการบันทึกซ้ำ
 // ========================================
 
 const savedBookings = new Map();
 
 // ========================================
-// รูปภาพ D-STATION
+// รูปต้นฉบับจาก ImgBB
 // ========================================
 
-const IMAGES = {
+const IMAGE_SOURCES = {
     coworking:
         "https://i.ibb.co/7Jxd0r4f/message-Image-1789295654187.jpg",
 
@@ -102,11 +108,35 @@ const IMAGES = {
 };
 
 // ========================================
+// URL รูปที่จะให้ LINE ใช้
+// ใช้ Render เป็นตัวกลาง
+// ========================================
+
+const IMAGES = {
+    coworking:
+        "https://dstation-line-server.onrender.com/images/coworking",
+
+    food:
+        "https://dstation-line-server.onrender.com/images/food",
+
+    drinks:
+        "https://dstation-line-server.onrender.com/images/drinks",
+
+    live:
+        "https://dstation-line-server.onrender.com/images/live",
+
+    meeting:
+        "https://dstation-line-server.onrender.com/images/meeting",
+
+    podcast:
+        "https://dstation-line-server.onrender.com/images/podcast"
+};
+
+// ========================================
 // ข้อมูล D-STATION
 // ========================================
 
 const D_STATION_INFO = `
-
 คุณคือ AI ผู้ช่วยของ D-STATION นครสวรรค์
 
 หน้าที่ของคุณคือให้ข้อมูลเกี่ยวกับ D-STATION เท่านั้น
@@ -216,8 +246,11 @@ Co-working Space
 มีพื้นที่สำหรับนั่งทำงาน
 
 มี Wi-Fi
+
 มีปลั๊กไฟ
+
 บรรยากาศสงบ
+
 เหมาะกับการทำงานและอ่านหนังสือ
 
 มีอาหารและเครื่องดื่มให้บริการ
@@ -232,7 +265,9 @@ Co-working Space
 
 Monthly Pass:
 999 บาท / เดือน
+
 ใช้พื้นที่ได้ตลอดเดือน
+
 ฟรีเครื่องดื่ม 15 แก้ว / เดือน
 
 ========================================
@@ -242,12 +277,12 @@ Monthly Pass:
 D-STATION มีอาหารให้บริการ
 
 หากลูกค้าถามเมนูอาหาร:
+
 - ให้แจ้งว่ามีเมนูอาหาร
 - ให้ส่งรูปเมนูอาหาร
-- สามารถบอกลูกค้าให้ดูรายละเอียดเมนูและราคาได้จากรูป
+- ให้ลูกค้าดูรายละเอียดเมนูและราคาได้จากรูป
 
 ห้ามตอบว่าไม่มีข้อมูลเกี่ยวกับอาหาร
-หากลูกค้าขอทั้งอาหารและเครื่องดื่ม ให้ตอบว่าสามารถดูได้ทั้งสองเมนู
 
 ========================================
 เครื่องดื่ม
@@ -256,11 +291,18 @@ D-STATION มีอาหารให้บริการ
 D-STATION มีเครื่องดื่มให้บริการ
 
 หากลูกค้าถามเมนูเครื่องดื่ม:
+
 - ให้แจ้งว่ามีเมนูเครื่องดื่ม
 - ให้ส่งรูปเมนูเครื่องดื่ม
-- สามารถบอกลูกค้าให้ดูรายละเอียดเมนูและราคาได้จากรูป
+- ให้ลูกค้าดูรายละเอียดเมนูและราคาได้จากรูป
 
 ห้ามตอบว่าไม่มีข้อมูลเกี่ยวกับเครื่องดื่ม
+
+หากลูกค้าขอทั้งอาหารและเครื่องดื่ม:
+
+ให้ตอบว่าสามารถดูได้ทั้งสองเมนู
+
+ห้ามตอบว่าไม่มีข้อมูล
 
 ========================================
 กฎการตอบ
@@ -278,6 +320,7 @@ D-STATION มีเครื่องดื่มให้บริการ
 
 หากลูกค้าถามเรื่องที่ไม่เกี่ยวกับ D-STATION เช่น
 การบ้าน เกม ข่าวทั่วไป สูตรอาหาร หรือเรื่องอื่น ๆ
+
 ให้ตอบว่า:
 
 "ขออภัยค่ะ เรื่องนี้ไม่มีข้อมูลอยู่ในระบบของ D-STATION ค่ะ หากต้องการสอบถามข้อมูลเกี่ยวกับ D-STATION สามารถถามได้เลยนะคะ 😊"
@@ -290,6 +333,7 @@ D-STATION มีเครื่องดื่มให้บริการ
 ========================================
 
 หากลูกค้าพูดว่าต้องการ:
+
 - จอง
 - ขอจอง
 - ต้องการจองห้อง
@@ -303,7 +347,9 @@ D-STATION มีเครื่องดื่มให้บริการ
 ให้ถือว่าลูกค้าต้องการ "จองบริการ"
 
 ห้ามตอบเฉพาะโปรโมชั่น
+
 ห้ามส่งเฉพาะข้อมูลราคา
+
 ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
 
 ========================================
@@ -397,12 +443,15 @@ Live Studio
 สำคัญ:
 
 ต้องมีคำว่า:
+
 "ข้อมูลครบแล้วค่ะ"
 
 ห้ามบอกว่าจองสำเร็จแล้ว
+
 ห้ามบอกว่าห้องว่างแน่นอน
 
 รูปแบบเวลาต้องเป็น:
+
 เวลา: 10:00 - 12:00
 
 ไม่ต้องใส่คำว่า "น." หลังเวลา
@@ -416,6 +465,89 @@ app.get("/", (req, res) => {
     res.send(
         "D-STATION LINE Webhook Server is running!"
     );
+});
+
+// ========================================
+// IMAGE PROXY
+// ให้ LINE ดึงรูปผ่าน Render
+// ========================================
+
+app.get("/images/:name", async (req, res) => {
+    try {
+        const name = req.params.name;
+        const imageUrl = IMAGE_SOURCES[name];
+
+        console.log(
+            "Image Proxy Request:",
+            name
+        );
+
+        if (!imageUrl) {
+            console.error(
+                "ไม่พบรูป:",
+                name
+            );
+
+            return res.status(404).send(
+                "ไม่พบรูปภาพ"
+            );
+        }
+
+        const response = await fetch(imageUrl);
+
+        console.log(
+            "ImgBB Response:",
+            response.status,
+            response.headers.get("content-type")
+        );
+
+        if (!response.ok) {
+            console.error(
+                "ไม่สามารถดึงรูปจาก ImgBB:",
+                response.status
+            );
+
+            return res.status(500).send(
+                "ไม่สามารถดึงรูปภาพได้"
+            );
+        }
+
+        const contentType =
+            response.headers.get("content-type") ||
+            "image/jpeg";
+
+        const buffer =
+            Buffer.from(
+                await response.arrayBuffer()
+            );
+
+        res.setHeader(
+            "Content-Type",
+            contentType
+        );
+
+        res.setHeader(
+            "Content-Length",
+            buffer.length
+        );
+
+        res.setHeader(
+            "Cache-Control",
+            "public, max-age=3600"
+        );
+
+        res.send(buffer);
+
+    } catch (error) {
+        console.error(
+            "Image Proxy Error:",
+            error
+        );
+
+        res.status(500).send(
+            "เกิดข้อผิดพลาดในการส่งรูป"
+        );
+    }
 });
 
 // ========================================
@@ -436,7 +568,8 @@ function createImageMessage(url) {
 
 app.post("/send-confirmation", async (req, res) => {
     try {
-        const bookingId = req.body?.bookingId;
+        const bookingId =
+            req.body?.bookingId;
 
         console.log(
             "ได้รับคำขอส่งข้อความยืนยัน:",
@@ -463,29 +596,35 @@ app.post("/send-confirmation", async (req, res) => {
             });
         }
 
-        const booking = bookingDoc.data();
+        const booking =
+            bookingDoc.data();
 
         console.log(
             "ข้อมูลการจองที่จะส่ง LINE:",
             {
                 room: booking.room,
+                service: booking.service,
                 people: booking.people,
                 date: booking.date,
                 startTime: booking.startTime,
                 endTime: booking.endTime,
-                hasLineUserId: !!booking.lineUserId
+                hasLineUserId:
+                    !!booking.lineUserId
             }
         );
 
         if (!booking.lineUserId) {
             return res.status(400).json({
                 success: false,
-                message: "ไม่พบ LINE User ID ของลูกค้า"
+                message:
+                    "ไม่พบ LINE User ID ของลูกค้า"
             });
         }
 
         const confirmationMessage =
 `ยืนยันการจองค่ะ 🎉
+
+บริการ: ${booking.service || booking.room}
 
 ห้อง: ${booking.room}
 
@@ -506,19 +645,24 @@ app.post("/send-confirmation", async (req, res) => {
                 "https://api.line.me/v2/bot/message/push",
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json",
+
                         "Authorization":
                             `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
                     },
+
                     body:
                         JSON.stringify({
                             to:
                                 booking.lineUserId,
+
                             messages: [
                                 {
                                     type: "text",
+
                                     text:
                                         confirmationMessage
                                 }
@@ -530,6 +674,11 @@ app.post("/send-confirmation", async (req, res) => {
         if (!lineResponse.ok) {
             const lineError =
                 await lineResponse.text();
+
+            console.error(
+                "LINE Push Status:",
+                lineResponse.status
+            );
 
             console.error(
                 "LINE Push Error:",
@@ -552,7 +701,6 @@ app.post("/send-confirmation", async (req, res) => {
         });
 
     } catch (error) {
-
         console.error(
             "Confirmation Error:",
             error
@@ -574,7 +722,11 @@ app.post("/webhook", async (req, res) => {
 
     console.log(
         "LINE Webhook:",
-        JSON.stringify(req.body, null, 2)
+        JSON.stringify(
+            req.body,
+            null,
+            2
+        )
     );
 
     try {
@@ -606,10 +758,14 @@ app.post("/webhook", async (req, res) => {
         // Sticker
         // ========================================
 
-        if (event.message?.type === "sticker") {
+        if (
+            event.message?.type ===
+            "sticker"
+        ) {
 
             const stickerReply = {
                 type: "text",
+
                 text:
                     "ได้รับสติกเกอร์แล้วค่ะ 😊\nมีอะไรให้ D-STATION ช่วยสอบถามได้เลยนะคะ"
             };
@@ -619,16 +775,20 @@ app.post("/webhook", async (req, res) => {
                     "https://api.line.me/v2/bot/message/reply",
                     {
                         method: "POST",
+
                         headers: {
                             "Content-Type":
                                 "application/json",
+
                             "Authorization":
                                 `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
                         },
+
                         body:
                             JSON.stringify({
                                 replyToken:
                                     replyToken,
+
                                 messages: [
                                     stickerReply
                                 ]
@@ -637,6 +797,11 @@ app.post("/webhook", async (req, res) => {
                 );
 
             if (!stickerResponse.ok) {
+                console.error(
+                    "LINE Sticker Reply Status:",
+                    stickerResponse.status
+                );
+
                 console.error(
                     "LINE Sticker Reply Error:",
                     await stickerResponse.text()
@@ -650,7 +815,10 @@ app.post("/webhook", async (req, res) => {
         // รับเฉพาะ Text
         // ========================================
 
-        if (event.message?.type !== "text") {
+        if (
+            event.message?.type !==
+            "text"
+        ) {
             return res.sendStatus(200);
         }
 
@@ -695,7 +863,7 @@ app.post("/webhook", async (req, res) => {
                 .test(userMessage);
 
         // ========================================
-        // ตรวจว่าขออาหาร + เครื่องดื่มพร้อมกัน
+        // อาหาร + เครื่องดื่ม
         // ========================================
 
         const isFoodAndDrinkQuestion =
@@ -718,8 +886,7 @@ app.post("/webhook", async (req, res) => {
 
         history.push({
             role: "user",
-            content:
-                userMessage
+            content: userMessage
         });
 
         if (history.length > 20) {
@@ -730,53 +897,244 @@ app.post("/webhook", async (req, res) => {
         }
 
         // ========================================
-        // คำสั่งเพิ่มเติมให้ AI ตามคำถามปัจจุบัน
+        // ตรวจโหมดการจองเดิม
+        // ========================================
+
+        let currentBookingMode =
+            bookingModes.get(userId) || "";
+
+        // ========================================
+        // ถ้าเป็นคำขอจองใหม่
+        // ========================================
+
+        if (isBookingRequest) {
+
+            if (isPodcastQuestion) {
+
+                currentBookingMode =
+                    "Podcast Studio";
+
+                bookingModes.set(
+                    userId,
+                    currentBookingMode
+                );
+
+            } else if (isLiveQuestion) {
+
+                currentBookingMode =
+                    "Live Studio";
+
+                bookingModes.set(
+                    userId,
+                    currentBookingMode
+                );
+
+            } else if (
+                isMeetingRoomQuestion
+            ) {
+
+                currentBookingMode =
+                    "ห้องประชุม";
+
+                bookingModes.set(
+                    userId,
+                    currentBookingMode
+                );
+
+            } else {
+
+                currentBookingMode =
+                    "บริการของ D-STATION";
+
+                bookingModes.set(
+                    userId,
+                    currentBookingMode
+                );
+            }
+        }
+
+        // ========================================
+        // คำสั่งเพิ่มเติมให้ AI
         // ========================================
 
         let currentInstruction = "";
 
         if (isBookingRequest) {
 
-            if (isPodcastQuestion) {
+            if (
+                currentBookingMode ===
+                "Podcast Studio"
+            ) {
 
                 currentInstruction = `
 คำสั่งสำคัญสำหรับข้อความล่าสุด:
+
 ลูกค้าต้องการ "จอง Podcast Studio"
+
 นี่คือคำขอจอง ไม่ใช่การถามโปรโมชั่น
+
 ห้ามตอบเฉพาะโปรโมชั่น
-ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
-กำหนดห้องเป็น "Podcast Studio"
+
+ห้ามตอบเฉพาะราคา
+
+ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+
+กำหนดห้องเป็น:
+Podcast Studio
+
+ให้ใช้แบบฟอร์มการจองที่กำหนดไว้ในข้อมูล D-STATION
 `;
 
-            } else if (isLiveQuestion) {
+            } else if (
+                currentBookingMode ===
+                "Live Studio"
+            ) {
 
                 currentInstruction = `
 คำสั่งสำคัญสำหรับข้อความล่าสุด:
+
 ลูกค้าต้องการ "จอง Live Studio"
+
 นี่คือคำขอจอง ไม่ใช่การถามโปรโมชั่น
+
 ห้ามตอบเฉพาะโปรโมชั่น
-ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
-กำหนดห้องเป็น "Live Studio"
+
+ห้ามตอบเฉพาะราคา
+
+ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+
+กำหนดห้องเป็น:
+Live Studio
+
+ให้ใช้แบบฟอร์มการจองที่กำหนดไว้ในข้อมูล D-STATION
 `;
 
-            } else if (isMeetingRoomQuestion) {
+            } else if (
+                currentBookingMode ===
+                "ห้องประชุม"
+            ) {
 
                 currentInstruction = `
 คำสั่งสำคัญสำหรับข้อความล่าสุด:
+
 ลูกค้าต้องการจองห้องประชุม
-ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+
+นี่คือคำขอจอง ไม่ใช่การถามโปรโมชั่น
+
 ห้ามตอบเฉพาะโปรโมชั่น
+
+ห้ามตอบเฉพาะราคา
+
+ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+
+เมื่อทราบจำนวนคนแล้วให้เลือก:
+4-6 คน = Byte Meeting Room
+7-10 คน = Pixel Meeting Room
+12-30 คน = Nexus Meeting Room
 `;
 
             } else {
 
                 currentInstruction = `
 คำสั่งสำคัญสำหรับข้อความล่าสุด:
+
 ลูกค้าต้องการจองบริการของ D-STATION
-ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจอง
+
+ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
+
 ห้ามตอบเฉพาะโปรโมชั่น
+
+ห้ามตอบเฉพาะราคา
 `;
             }
+
+        } else if (
+            currentBookingMode
+        ) {
+
+            currentInstruction = `
+คำสั่งสำคัญ:
+
+ลูกค้ากำลังอยู่ในขั้นตอนการจอง ${currentBookingMode}
+
+ให้ดำเนินการเก็บข้อมูลการจองต่อจากข้อมูลที่ลูกค้าเคยให้ไว้ในประวัติการสนทนา
+
+ห้ามเริ่มต้นโปรโมชั่นใหม่
+
+ห้ามวนกลับไปอธิบายโปรโมชั่น
+
+ห้ามถามข้อมูลที่ลูกค้าให้มาแล้ว
+
+ถามเฉพาะข้อมูลที่ยังขาด
+
+หากข้อมูลครบแล้ว ให้สรุปตามรูปแบบการจองที่กำหนดไว้
+`;
+        }
+
+        // ========================================
+        // กรณีอาหาร + เครื่องดื่ม
+        // ========================================
+
+        if (
+            isFoodAndDrinkQuestion
+        ) {
+
+            currentInstruction += `
+คำสั่งเพิ่มเติม:
+
+ลูกค้าต้องการดูทั้งเมนูอาหารและเครื่องดื่ม
+
+ต้องตอบว่ามีทั้งอาหารและเครื่องดื่ม
+
+ห้ามตอบว่าไม่มีข้อมูล
+
+ห้ามบอกว่าไม่มีเมนู
+
+ไม่ต้องแสดงรายการราคาเอง
+ให้ลูกค้าดูรายละเอียดจากรูปเมนู
+`;
+        }
+
+        // ========================================
+        // กรณีอาหาร
+        // ========================================
+
+        else if (
+            isFoodQuestion
+        ) {
+
+            currentInstruction += `
+คำสั่งเพิ่มเติม:
+
+ลูกค้าต้องการดูเมนูอาหาร
+
+ต้องตอบว่ามีเมนูอาหาร
+
+ห้ามตอบว่าไม่มีข้อมูล
+
+ให้ลูกค้าดูรายละเอียดและราคาจากรูปเมนู
+`;
+        }
+
+        // ========================================
+        // กรณีเครื่องดื่ม
+        // ========================================
+
+        else if (
+            isDrinkQuestion
+        ) {
+
+            currentInstruction += `
+คำสั่งเพิ่มเติม:
+
+ลูกค้าต้องการดูเมนูเครื่องดื่ม
+
+ต้องตอบว่ามีเมนูเครื่องดื่ม
+
+ห้ามตอบว่าไม่มีข้อมูล
+
+ให้ลูกค้าดูรายละเอียดและราคาจากรูปเมนู
+`;
         }
 
         // ========================================
@@ -785,7 +1143,6 @@ app.post("/webhook", async (req, res) => {
 
         const response =
             await openai.responses.create({
-
                 model:
                     "gpt-5.6-luna",
 
@@ -799,7 +1156,8 @@ app.post("/webhook", async (req, res) => {
             });
 
         const aiReply =
-            response.output_text;
+            response.output_text ||
+            "ขออภัยค่ะ ขณะนี้ไม่สามารถตอบข้อความได้ค่ะ";
 
         console.log(
             "AI:",
@@ -808,8 +1166,7 @@ app.post("/webhook", async (req, res) => {
 
         history.push({
             role: "assistant",
-            content:
-                aiReply
+            content: aiReply
         });
 
         // ========================================
@@ -820,12 +1177,24 @@ app.post("/webhook", async (req, res) => {
             aiReply.includes(
                 "ข้อมูลครบแล้วค่ะ"
             ) &&
-            aiReply.includes("ห้อง:") &&
-            aiReply.includes("จำนวนคน:") &&
-            aiReply.includes("วันที่:") &&
-            aiReply.includes("เวลา:") &&
-            aiReply.includes("ชื่อ:") &&
-            aiReply.includes("เบอร์ติดต่อ:");
+            aiReply.includes(
+                "ห้อง:"
+            ) &&
+            aiReply.includes(
+                "จำนวนคน:"
+            ) &&
+            aiReply.includes(
+                "วันที่:"
+            ) &&
+            aiReply.includes(
+                "เวลา:"
+            ) &&
+            aiReply.includes(
+                "ชื่อ:"
+            ) &&
+            aiReply.includes(
+                "เบอร์ติดต่อ:"
+            );
 
         console.log(
             "ข้อมูลการจองครบ:",
@@ -833,10 +1202,13 @@ app.post("/webhook", async (req, res) => {
         );
 
         // ========================================
-        // ฟังก์ชันดึงข้อมูลจาก Summary
+        // ฟังก์ชันดึงข้อมูล
         // ========================================
 
-        function getField(text, fieldName) {
+        function getField(
+            text,
+            fieldName
+        ) {
 
             const regex =
                 new RegExp(
@@ -937,7 +1309,8 @@ app.post("/webhook", async (req, res) => {
             // ระบุ Service
             // ========================================
 
-            let service = "ห้องประชุม";
+            let service =
+                "ห้องประชุม";
 
             if (
                 /Podcast Studio/i.test(room) ||
@@ -950,6 +1323,28 @@ app.post("/webhook", async (req, res) => {
             } else if (
                 /Live Studio/i.test(room) ||
                 /ไลฟ์/i.test(room)
+            ) {
+
+                service =
+                    "Live Studio";
+            }
+
+            // ========================================
+            // ถ้า AI ระบุห้องไม่ชัด
+            // ใช้ Booking Mode ช่วย
+            // ========================================
+
+            if (
+                currentBookingMode ===
+                "Podcast Studio"
+            ) {
+
+                service =
+                    "Podcast Studio";
+
+            } else if (
+                currentBookingMode ===
+                "Live Studio"
             ) {
 
                 service =
@@ -1061,6 +1456,11 @@ app.post("/webhook", async (req, res) => {
                     bookingRef.id
                 );
 
+                // จบโหมดการจอง
+                bookingModes.delete(
+                    userId
+                );
+
             } else {
 
                 console.log(
@@ -1071,17 +1471,17 @@ app.post("/webhook", async (req, res) => {
 
         // ========================================
         // เตรียมข้อความ LINE
-        // รูปต้องมาก่อนข้อความ
         // ========================================
 
         const messages = [];
 
         // ========================================
         // อาหาร + เครื่องดื่ม
-        // ต้องส่ง 2 รูป
         // ========================================
 
-        if (isFoodAndDrinkQuestion) {
+        if (
+            isFoodAndDrinkQuestion
+        ) {
 
             messages.push(
                 createImageMessage(
@@ -1192,9 +1592,18 @@ app.post("/webhook", async (req, res) => {
 
         messages.push({
             type: "text",
-            text:
-                aiReply
+            text: aiReply
         });
+
+        // ========================================
+        // LINE จำกัดสูงสุด 5 messages
+        // ตอนนี้ใช้สูงสุด 3 messages
+        // ========================================
+
+        console.log(
+            "จำนวนข้อความที่จะส่ง LINE:",
+            messages.length
+        );
 
         // ========================================
         // ส่งกลับ LINE
@@ -1231,25 +1640,55 @@ app.post("/webhook", async (req, res) => {
                 await lineResponse.text();
 
             console.error(
-                "LINE API Error:",
+                "========================================"
+            );
+
+            console.error(
+                "LINE API ERROR"
+            );
+
+            console.error(
+                "Status:",
+                lineResponse.status
+            );
+
+            console.error(
+                "Error:",
                 lineError
+            );
+
+            console.error(
+                "========================================"
+            );
+
+        } else {
+
+            console.log(
+                "ส่งคำตอบกลับ LINE สำเร็จ"
             );
         }
 
-        console.log(
-            "ส่งคำตอบกลับ LINE สำเร็จ"
-        );
-
-        res.sendStatus(200);
+        return res.sendStatus(200);
 
     } catch (error) {
 
         console.error(
-            "Error:",
+            "========================================"
+        );
+
+        console.error(
+            "WEBHOOK ERROR:"
+        );
+
+        console.error(
             error
         );
 
-        res.sendStatus(500);
+        console.error(
+            "========================================"
+        );
+
+        return res.sendStatus(500);
     }
 });
 
