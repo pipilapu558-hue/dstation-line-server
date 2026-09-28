@@ -1332,6 +1332,29 @@ Live Studio
 `;
             }
 
+// ========================================
+// Podcast - ส่งรูปทันที
+// ========================================
+
+if (
+    isPodcastQuestion &&
+    !isBookingRequest
+) {
+    await replyToLine(
+        replyToken,
+        [
+            createImageMessage("podcast"),
+            {
+                type: "text",
+                text:
+                    "สนใจห้อง Podcast Studio สามารถดูรายละเอียดจากรูปด้านบนได้เลยค่ะ 🎙️\n\nราคา 500 บาท / 1 ชั่วโมง\nจอง 1 ชั่วโมง แถมฟรี 1 ชั่วโมง\nพร้อมอุปกรณ์สำหรับ Podcast และการสร้างคอนเทนต์ค่ะ 😊"
+            }
+        ]
+    );
+
+    return res.sendStatus(200);
+}
+
 
             // ========================================
             // เรียก OpenAI
