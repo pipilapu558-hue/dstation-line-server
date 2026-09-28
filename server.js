@@ -145,20 +145,7 @@ const IMAGES = {
 // ========================================
 
 function createPreviewUrl(imageName) {
-    const sourceUrl = IMAGE_SOURCES[imageName];
-
-    if (!sourceUrl) {
-        return "";
-    }
-
-    return (
-        "https://wsrv.nl/?" +
-        "url=" +
-        encodeURIComponent(sourceUrl) +
-        "&w=800" +
-        "&q=70" +
-        "&output=jpg"
-    );
+    return IMAGES[imageName];
 }
 
 
