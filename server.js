@@ -915,7 +915,7 @@ app.post(
                     .test(userMessage);
 
             const isPodcastQuestion =
-    /พอดแคสต์|podcast|พอคแคสต์|ห้องอัด|ห้องพอดแคสต์|สนใจ.*พอดแคสต์|สนใจ.*podcast/i
+    /พอดแคสต์|podcast|พอคแคสต์|ห้องอัด/i
         .test(userMessage);
 
             const isLiveQuestion =
@@ -1338,7 +1338,7 @@ Live Studio
 
 if (
     isPodcastQuestion &&
-    !isBookingRequest
+    !/จอง|ขอจอง|ต้องการจอง|จองห้อง|booking/i.test(userMessage)
 ) {
     await replyToLine(
         replyToken,
