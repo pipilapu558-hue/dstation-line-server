@@ -6,6 +6,7 @@ import fs from "fs";
 
 const app = express();
 
+
 // ========================================
 // CORS
 // ========================================
@@ -32,6 +33,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
 
+
 // ========================================
 // Firebase
 // ========================================
@@ -57,6 +59,7 @@ initializeApp({
 
 const db = getFirestore();
 
+
 // ========================================
 // OpenAI
 // ========================================
@@ -65,11 +68,13 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
+
 // ========================================
 // เก็บประวัติการคุย
 // ========================================
 
 const conversations = new Map();
+
 
 // ========================================
 // จำว่าลูกค้ากำลังจองบริการอะไร
@@ -77,15 +82,16 @@ const conversations = new Map();
 
 const bookingModes = new Map();
 
+
 // ========================================
 // ป้องกันการบันทึกซ้ำ
 // ========================================
 
 const savedBookings = new Map();
 
+
 // ========================================
 // รูปต้นฉบับจาก ImgBB
-// สำคัญ: ต้องเป็น URL จริง ห้ามใส่ Markdown
 // ========================================
 
 const IMAGE_SOURCES = {
@@ -108,8 +114,9 @@ const IMAGE_SOURCES = {
         "https://i.ibb.co/HDmWC5mb/Gemini-Generated-Image-2odn1q2odn1q2odn.jpg"
 };
 
+
 // ========================================
-// URL รูปที่จะให้ LINE ใช้เป็น Original
+// URL รูปผ่าน Render
 // ========================================
 
 const IMAGES = {
@@ -132,11 +139,9 @@ const IMAGES = {
         "https://dstation-line-server.onrender.com/images/podcast"
 };
 
+
 // ========================================
 // สร้าง Preview URL
-//
-// ใช้ wsrv.nl ช่วยลดขนาดรูป Preview
-// เพราะ LINE กำหนด previewImageUrl ไม่เกิน 1 MB
 // ========================================
 
 function createPreviewUrl(imageName) {
@@ -156,6 +161,7 @@ function createPreviewUrl(imageName) {
     );
 }
 
+
 // ========================================
 // ข้อมูล D-STATION
 // ========================================
@@ -173,29 +179,23 @@ const D_STATION_INFO = `
 D-STATION นครสวรรค์
 
 ที่อยู่:
-
 49/60-61 อำเภอเมืองนครสวรรค์
 นครสวรรค์ 60000
 
 วิธีเดินทาง:
-
 เลยสวนขอบฟ้า มาเลี้ยวซ้าย
 ร้านจะอยู่ตรงข้ามเจ๊หนุ่ยหมูตุ๋น
 
 Google Maps:
-
 https://share.google/BaSU1tBqAHnNmsLXT
 
 เวลาเปิดบริการ:
-
 08:00 - 23:00 น.
 
 โทร:
-
 095-490-6492
 
 LINE OA:
-
 @d-station.co
 
 ========================================
@@ -203,25 +203,18 @@ LINE OA:
 ========================================
 
 1. Byte Meeting Room
-
 รองรับ 4-6 คน
-
 ราคา 500 บาท / 2 ชั่วโมง
 
 2. Pixel Meeting Room
-
 รองรับ 7-10 คน
-
 ราคา 800 บาท / 2 ชั่วโมง
 
 3. Nexus Meeting Room
-
 รองรับ 12-30 คน
-
 ราคา 1,000 บาท / 2 ชั่วโมง
 
 รายละเอียด:
-
 - ห้องประชุมเป็นห้องส่วนตัว
 - มี Wi-Fi
 - มีอุปกรณ์พร้อมใช้งาน
@@ -230,7 +223,6 @@ LINE OA:
 - ไม่มีโปรเจกเตอร์
 
 โปรโมชั่น:
-
 ค่าบริการเช่าห้องประชุม
 สามารถนำมาใช้เป็นส่วนลดค่าอาหารและเครื่องดื่มได้เต็มจำนวน
 
@@ -239,21 +231,17 @@ Podcast Studio
 ========================================
 
 ชื่อบริการ:
-
 Podcast Studio
 
 ราคา:
-
 500 บาท / 1 ชั่วโมง
 
 โปรโมชั่น:
-
 จอง 1 ชั่วโมง แถมฟรี 1 ชั่วโมง
 
 มีอุปกรณ์พร้อมใช้งาน
 
 เหมาะสำหรับ:
-
 - Podcast
 - สัมภาษณ์
 - สร้างคอนเทนต์
@@ -263,15 +251,12 @@ Live Studio
 ========================================
 
 ชื่อบริการ:
-
 Live Studio
 
 ราคา:
-
 500 บาท / 1 ชั่วโมง
 
 โปรโมชั่น:
-
 จอง 1 ชั่วโมง แถมฟรี 1 ชั่วโมง
 
 มีอุปกรณ์
@@ -279,7 +264,6 @@ Live Studio
 และฉากพร้อมใช้งาน
 
 เหมาะสำหรับ:
-
 - ไลฟ์ขายสินค้า
 - รีวิวสินค้า
 - สร้างคอนเทนต์
@@ -291,15 +275,10 @@ Co-working Space
 ========================================
 
 มีพื้นที่สำหรับนั่งทำงาน
-
 มี Wi-Fi
-
 มีปลั๊กไฟ
-
 บรรยากาศสงบ
-
 เหมาะกับการทำงานและอ่านหนังสือ
-
 มีอาหารและเครื่องดื่มให้บริการ
 
 ค่าใช้บริการ:
@@ -311,11 +290,8 @@ Co-working Space
 ใช้พื้นที่ได้ทั้งวัน
 
 Monthly Pass:
-
 999 บาท / เดือน
-
 ใช้พื้นที่ได้ตลอดเดือน
-
 ฟรีเครื่องดื่ม 15 แก้ว / เดือน
 
 ========================================
@@ -325,7 +301,6 @@ Monthly Pass:
 D-STATION มีอาหารให้บริการ
 
 หากลูกค้าถามเมนูอาหาร:
-
 - ให้แจ้งว่ามีเมนูอาหาร
 - ให้ส่งรูปเมนูอาหาร
 - ให้ลูกค้าดูรายละเอียดเมนูและราคาได้จากรูป
@@ -339,18 +314,11 @@ D-STATION มีอาหารให้บริการ
 D-STATION มีเครื่องดื่มให้บริการ
 
 หากลูกค้าถามเมนูเครื่องดื่ม:
-
 - ให้แจ้งว่ามีเมนูเครื่องดื่ม
 - ให้ส่งรูปเมนูเครื่องดื่ม
 - ให้ลูกค้าดูรายละเอียดเมนูและราคาได้จากรูป
 
 ห้ามตอบว่าไม่มีข้อมูลเกี่ยวกับเครื่องดื่ม
-
-หากลูกค้าขอทั้งอาหารและเครื่องดื่ม:
-
-ให้ตอบว่าสามารถดูได้ทั้งสองเมนู
-
-ห้ามตอบว่าไม่มีข้อมูล
 
 ========================================
 กฎการตอบ
@@ -363,25 +331,19 @@ D-STATION มีเครื่องดื่มให้บริการ
 - ตอบเฉพาะข้อมูลของ D-STATION
 - ห้ามแต่งราคา ข้อมูล หรือโปรโมชั่นขึ้นมาเอง
 
-หากไม่มีข้อมูล ให้บอกว่าไม่ทราบข้อมูลนี้
+หากไม่มีข้อมูล:
+ให้บอกว่าไม่ทราบข้อมูลนี้
 และแนะนำให้สอบถามพนักงาน D-STATION
 
-หากลูกค้าถามเรื่องที่ไม่เกี่ยวกับ D-STATION เช่น
-การบ้าน เกม ข่าวทั่วไป สูตรอาหาร หรือเรื่องอื่น ๆ
-
-ให้ตอบว่า:
+หากลูกค้าถามเรื่องที่ไม่เกี่ยวกับ D-STATION:
 
 "ขออภัยค่ะ เรื่องนี้ไม่มีข้อมูลอยู่ในระบบของ D-STATION ค่ะ หากต้องการสอบถามข้อมูลเกี่ยวกับ D-STATION สามารถถามได้เลยนะคะ 😊"
-
-ห้ามเงียบ
-ห้ามไม่ตอบลูกค้า
 
 ========================================
 สำคัญเกี่ยวกับการจอง
 ========================================
 
 หากลูกค้าพูดว่าต้องการ:
-
 - จอง
 - ขอจอง
 - ต้องการจองห้อง
@@ -392,10 +354,10 @@ D-STATION มีเครื่องดื่มให้บริการ
 - จองห้อง Podcast
 - จองห้องพอดแคสต์
 
-ให้ถือว่าลูกค้าต้องการ "จองบริการ"
+ให้ถือว่าลูกค้าต้องการจองบริการ
 
 ห้ามตอบเฉพาะโปรโมชั่น
-ห้ามส่งเฉพาะข้อมูลราคา
+ห้ามตอบเฉพาะราคา
 
 ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
 
@@ -411,32 +373,22 @@ D-STATION มีเครื่องดื่มให้บริการ
 4. Podcast Studio
 5. Live Studio
 
-เมื่อเริ่มต้นที่ลูกค้าต้องการจองห้อง
-
-ให้ใช้ข้อความนี้ EXACTLY:
+เมื่อเริ่มต้นการจอง
+ให้ใช้ข้อความนี้:
 
 เบื้องต้น รบกวนขออนุญาตขอข้อมูลเพื่อทำการจองห้องล่วงหน้าค่ะ
 
 ชื่อผู้ติดต่อ :
-
 ตำแหน่ง :
-
 จากหน่วยงาน/บริษัท :
-
 ที่อยู่ :
-
 โทร :
-
 อีเมล :
-
 วันที่เข้าใช้บริการ :
-
 เวลาที่เข้าใช้บริการ :
-
 จำนวนผู้เข้าใช้บริการ :
 
-ข้อมูลที่ต้องมีทั้งหมด:
-
+ข้อมูลที่ต้องมี:
 1. ชื่อผู้ติดต่อ
 2. ตำแหน่ง
 3. จากหน่วยงาน/บริษัท
@@ -453,18 +405,13 @@ D-STATION มีเครื่องดื่มให้บริการ
 หากข้อมูลยังไม่ครบ
 ให้ถามเฉพาะข้อมูลที่ยังขาด
 
-หากลูกค้าต้องการจอง Podcast Studio
-ให้ใช้ห้อง:
+Podcast Studio:
+ใช้ห้อง Podcast Studio
 
-Podcast Studio
+Live Studio:
+ใช้ห้อง Live Studio
 
-หากลูกค้าต้องการจอง Live Studio
-ให้ใช้ห้อง:
-
-Live Studio
-
-หากลูกค้าต้องการจองห้องประชุม:
-
+ห้องประชุม:
 4-6 คน = Byte Meeting Room
 7-10 คน = Pixel Meeting Room
 12-30 คน = Nexus Meeting Room
@@ -497,22 +444,18 @@ Live Studio
 รอพนักงาน D-STATION ตรวจสอบและยืนยันการจองนะคะ
 
 สำคัญ:
-
-ต้องมีคำว่า:
-
-"ข้อมูลครบแล้วค่ะ"
+ต้องมีคำว่า "ข้อมูลครบแล้วค่ะ"
 
 ห้ามบอกว่าจองสำเร็จแล้ว
-
 ห้ามบอกว่าห้องว่างแน่นอน
 
-รูปแบบเวลาต้องเป็น:
-
+รูปแบบเวลา:
 เวลา: 10:00 - 12:00
 
 ไม่ต้องใส่คำว่า "น." หลังเวลา
 
 `;
+
 
 // ========================================
 // หน้าแรก
@@ -523,6 +466,7 @@ app.get("/", (req, res) => {
         "D-STATION LINE Webhook Server is running!"
     );
 });
+
 
 // ========================================
 // IMAGE PROXY
@@ -536,48 +480,49 @@ app.get("/images/:name", async (req, res) => {
         console.log(
             "========================================"
         );
+
         console.log(
             "Image Proxy Request:",
             name
         );
+
         console.log(
-            "Source:",
+            "Image Source:",
             imageUrl
         );
 
         if (!imageUrl) {
-            console.error(
-                "ไม่พบรูป:",
-                name
-            );
-
             return res.status(404).send(
                 "ไม่พบรูปภาพ"
             );
         }
 
-        const response = await fetch(imageUrl);
+        const response = await fetch(
+            imageUrl
+        );
 
         console.log(
-            "ImgBB Response:",
-            response.status,
-            response.headers.get("content-type")
+            "ImgBB Status:",
+            response.status
+        );
+
+        console.log(
+            "Content-Type:",
+            response.headers.get(
+                "content-type"
+            )
         );
 
         if (!response.ok) {
-            console.error(
-                "ไม่สามารถดึงรูปจาก ImgBB:",
-                response.status
-            );
-
             return res.status(500).send(
                 "ไม่สามารถดึงรูปภาพได้"
             );
         }
 
         const contentType =
-            response.headers.get("content-type") ||
-            "image/jpeg";
+            response.headers.get(
+                "content-type"
+            ) || "image/jpeg";
 
         const buffer =
             Buffer.from(
@@ -619,6 +564,7 @@ app.get("/images/:name", async (req, res) => {
     }
 });
 
+
 // ========================================
 // สร้าง Image Message
 // ========================================
@@ -633,12 +579,18 @@ function createImageMessage(
         createPreviewUrl(imageName);
 
     console.log(
-        "สร้าง Image Message:",
-        {
-            imageName,
-            originalUrl,
-            previewUrl
-        }
+        "Create Image Message:",
+        imageName
+    );
+
+    console.log(
+        "Original:",
+        originalUrl
+    );
+
+    console.log(
+        "Preview:",
+        previewUrl
     );
 
     return {
@@ -650,8 +602,9 @@ function createImageMessage(
     };
 }
 
+
 // ========================================
-// ส่งข้อความผ่าน LINE Reply API
+// ส่งข้อความ LINE
 // ========================================
 
 async function replyToLine(
@@ -659,15 +612,16 @@ async function replyToLine(
     messages
 ) {
     console.log(
-        "LINE Reply Messages:",
+        "จำนวนข้อความที่จะส่ง:",
         messages.length
     );
 
-    const lineResponse =
+    const response =
         await fetch(
             "https://api.line.me/v2/bot/message/reply",
             {
                 method: "POST",
+
                 headers: {
                     "Content-Type":
                         "application/json",
@@ -680,15 +634,16 @@ async function replyToLine(
                     JSON.stringify({
                         replyToken:
                             replyToken,
+
                         messages:
                             messages
                     })
             }
         );
 
-    if (!lineResponse.ok) {
-        const lineError =
-            await lineResponse.text();
+    if (!response.ok) {
+        const errorText =
+            await response.text();
 
         console.error(
             "========================================"
@@ -700,12 +655,12 @@ async function replyToLine(
 
         console.error(
             "Status:",
-            lineResponse.status
+            response.status
         );
 
         console.error(
             "Error:",
-            lineError
+            errorText
         );
 
         console.error(
@@ -716,25 +671,28 @@ async function replyToLine(
     }
 
     console.log(
-        "ส่งคำตอบกลับ LINE สำเร็จ"
+        "ส่งข้อความ LINE สำเร็จ"
     );
 
     return true;
 }
 
+
 // ========================================
-// ส่งข้อความยืนยันการจองกลับ LINE
+// ส่งข้อความยืนยันการจอง
 // ========================================
 
 app.post(
     "/send-confirmation",
     async (req, res) => {
+
         try {
+
             const bookingId =
                 req.body?.bookingId;
 
             console.log(
-                "ได้รับคำขอส่งข้อความยืนยัน:",
+                "Booking ID:",
                 bookingId
             );
 
@@ -763,32 +721,6 @@ app.post(
             const booking =
                 bookingDoc.data();
 
-            console.log(
-                "ข้อมูลการจองที่จะส่ง LINE:",
-                {
-                    room:
-                        booking.room,
-
-                    service:
-                        booking.service,
-
-                    people:
-                        booking.people,
-
-                    date:
-                        booking.date,
-
-                    startTime:
-                        booking.startTime,
-
-                    endTime:
-                        booking.endTime,
-
-                    hasLineUserId:
-                        !!booking.lineUserId
-                }
-            );
-
             if (!booking.lineUserId) {
                 return res.status(400).json({
                     success: false,
@@ -816,7 +748,7 @@ app.post(
 
 ขอบคุณที่ใช้บริการ D-STATION นครสวรรค์ค่ะ 😊`;
 
-            const lineResponse =
+            const response =
                 await fetch(
                     "https://api.line.me/v2/bot/message/push",
                     {
@@ -848,18 +780,14 @@ app.post(
                     }
                 );
 
-            if (!lineResponse.ok) {
-                const lineError =
-                    await lineResponse.text();
+            if (!response.ok) {
 
-                console.error(
-                    "LINE Push Status:",
-                    lineResponse.status
-                );
+                const errorText =
+                    await response.text();
 
                 console.error(
                     "LINE Push Error:",
-                    lineError
+                    errorText
                 );
 
                 return res.status(500).json({
@@ -870,20 +798,21 @@ app.post(
             }
 
             console.log(
-                "ส่งข้อความยืนยันกลับ LINE สำเร็จ"
+                "ส่งข้อความยืนยันสำเร็จ"
             );
 
-            res.json({
+            return res.json({
                 success: true
             });
 
         } catch (error) {
+
             console.error(
                 "Confirmation Error:",
                 error
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 message:
                     "เกิดข้อผิดพลาด"
@@ -892,8 +821,9 @@ app.post(
     }
 );
 
+
 // ========================================
-// LINE Webhook
+// LINE WEBHOOK
 // ========================================
 
 app.post(
@@ -901,7 +831,14 @@ app.post(
     async (req, res) => {
 
         console.log(
-            "LINE Webhook:",
+            "========================================"
+        );
+
+        console.log(
+            "LINE WEBHOOK"
+        );
+
+        console.log(
             JSON.stringify(
                 req.body,
                 null,
@@ -937,8 +874,9 @@ app.post(
                 userId
             );
 
+
             // ========================================
-            // Sticker
+            // STICKER
             // ========================================
 
             if (
@@ -960,8 +898,9 @@ app.post(
                 return res.sendStatus(200);
             }
 
+
             // ========================================
-            // รับเฉพาะ Text
+            // รับเฉพาะ TEXT
             // ========================================
 
             if (
@@ -978,6 +917,7 @@ app.post(
                 "ลูกค้า:",
                 userMessage
             );
+
 
             // ========================================
             // ตรวจประเภทคำถาม
@@ -1019,14 +959,13 @@ app.post(
                 isFoodQuestion &&
                 isDrinkQuestion;
 
+
             // ========================================
-            // สร้างประวัติ
+            // ประวัติการคุย
             // ========================================
 
             if (
-                !conversations.has(
-                    userId
-                )
+                !conversations.has(userId)
             ) {
                 conversations.set(
                     userId,
@@ -1054,8 +993,9 @@ app.post(
                 );
             }
 
+
             // ========================================
-            // ตรวจโหมดการจองเดิม
+            // ตรวจ Booking Mode
             // ========================================
 
             let currentBookingMode =
@@ -1063,8 +1003,9 @@ app.post(
                     userId
                 ) || "";
 
+
             // ========================================
-            // ถ้าเป็นคำขอจองใหม่
+            // คำขอจองใหม่
             // ========================================
 
             if (isBookingRequest) {
@@ -1076,22 +1017,12 @@ app.post(
                     currentBookingMode =
                         "Podcast Studio";
 
-                    bookingModes.set(
-                        userId,
-                        currentBookingMode
-                    );
-
                 } else if (
                     isLiveQuestion
                 ) {
 
                     currentBookingMode =
                         "Live Studio";
-
-                    bookingModes.set(
-                        userId,
-                        currentBookingMode
-                    );
 
                 } else if (
                     isMeetingRoomQuestion
@@ -1100,27 +1031,23 @@ app.post(
                     currentBookingMode =
                         "ห้องประชุม";
 
-                    bookingModes.set(
-                        userId,
-                        currentBookingMode
-                    );
-
                 } else {
 
                     currentBookingMode =
                         "บริการของ D-STATION";
-
-                    bookingModes.set(
-                        userId,
-                        currentBookingMode
-                    );
                 }
+
+                bookingModes.set(
+                    userId,
+                    currentBookingMode
+                );
             }
 
+
             // ========================================
-            // สำคัญมาก
+            // MENU
             //
-            // คำถามเมนูทั่วไปไม่ต้องเรียก AI
+            // เมนูไม่เรียก AI
             // ========================================
 
             if (
@@ -1133,7 +1060,7 @@ app.post(
                 )
             ) {
 
-                let menuMessages = [];
+                const menuMessages = [];
 
                 if (
                     isGeneralMenuQuestion ||
@@ -1155,7 +1082,7 @@ app.post(
                     menuMessages.push({
                         type: "text",
                         text:
-                            "ได้เลยค่ะ 😊 สามารถดูเมนูอาหารและเครื่องดื่มได้จากรูปด้านบนเลยนะคะ"
+                            "ได้เลยค่ะ 😊 สามารถดูเมนูอาหารและเครื่องดื่มจากรูปด้านบนได้เลยนะคะ"
                     });
 
                 } else if (
@@ -1171,7 +1098,7 @@ app.post(
                     menuMessages.push({
                         type: "text",
                         text:
-                            "ได้เลยค่ะ 😊 เมนูอาหารและราคาสามารถดูได้จากรูปด้านบนเลยนะคะ"
+                            "ได้เลยค่ะ 😊 เมนูอาหารและราคาดูได้จากรูปด้านบนเลยนะคะ"
                     });
 
                 } else if (
@@ -1187,22 +1114,9 @@ app.post(
                     menuMessages.push({
                         type: "text",
                         text:
-                            "ได้เลยค่ะ 😊 เมนูเครื่องดื่มและราคาสามารถดูได้จากรูปด้านบนเลยนะคะ"
+                            "ได้เลยค่ะ 😊 เมนูเครื่องดื่มและราคาดูได้จากรูปด้านบนเลยนะคะ"
                     });
                 }
-
-                history.push({
-                    role: "assistant",
-                    content:
-                        menuMessages[
-                            menuMessages.length - 1
-                        ]?.text ||
-                        "ส่งเมนูให้ลูกค้าแล้วค่ะ"
-                });
-
-                console.log(
-                    "ส่งเมนูโดยไม่เรียก AI"
-                );
 
                 await replyToLine(
                     replyToken,
@@ -1212,9 +1126,10 @@ app.post(
                 return res.sendStatus(200);
             }
 
+
             // ========================================
-            // คำถาม Podcast / Live / Meeting / Coworking
-            // ไม่ใช่การจอง
+            // PODCAST
+            // ถ้าไม่ใช่การจอง
             // ========================================
 
             if (
@@ -1233,16 +1148,6 @@ app.post(
                     }
                 ];
 
-                history.push({
-                    role: "assistant",
-                    content:
-                        messages[1].text
-                });
-
-                console.log(
-                    "ส่งข้อมูล Podcast โดยไม่เรียก AI"
-                );
-
                 await replyToLine(
                     replyToken,
                     messages
@@ -1250,6 +1155,11 @@ app.post(
 
                 return res.sendStatus(200);
             }
+
+
+            // ========================================
+            // LIVE
+            // ========================================
 
             if (
                 !isBookingRequest &&
@@ -1267,16 +1177,6 @@ app.post(
                     }
                 ];
 
-                history.push({
-                    role: "assistant",
-                    content:
-                        messages[1].text
-                });
-
-                console.log(
-                    "ส่งข้อมูล Live โดยไม่เรียก AI"
-                );
-
                 await replyToLine(
                     replyToken,
                     messages
@@ -1284,6 +1184,11 @@ app.post(
 
                 return res.sendStatus(200);
             }
+
+
+            // ========================================
+            // ห้องประชุม
+            // ========================================
 
             if (
                 !isBookingRequest &&
@@ -1301,16 +1206,6 @@ app.post(
                     }
                 ];
 
-                history.push({
-                    role: "assistant",
-                    content:
-                        messages[1].text
-                });
-
-                console.log(
-                    "ส่งข้อมูลห้องประชุมโดยไม่เรียก AI"
-                );
-
                 await replyToLine(
                     replyToken,
                     messages
@@ -1318,6 +1213,11 @@ app.post(
 
                 return res.sendStatus(200);
             }
+
+
+            // ========================================
+            // CO-WORKING
+            // ========================================
 
             if (
                 !isBookingRequest &&
@@ -1335,16 +1235,6 @@ app.post(
                     }
                 ];
 
-                history.push({
-                    role: "assistant",
-                    content:
-                        messages[1].text
-                });
-
-                console.log(
-                    "ส่งข้อมูล Co-working โดยไม่เรียก AI"
-                );
-
                 await replyToLine(
                     replyToken,
                     messages
@@ -1353,11 +1243,13 @@ app.post(
                 return res.sendStatus(200);
             }
 
+
             // ========================================
-            // คำสั่งเพิ่มเติมให้ AI
+            // AI INSTRUCTION
             // ========================================
 
             let currentInstruction = "";
+
 
             if (isBookingRequest) {
 
@@ -1368,11 +1260,9 @@ app.post(
 
                     currentInstruction = `
 
-คำสั่งสำคัญสำหรับข้อความล่าสุด:
+ลูกค้าต้องการจอง Podcast Studio
 
-ลูกค้าต้องการ "จอง Podcast Studio"
-
-นี่คือคำขอจอง ไม่ใช่การถามโปรโมชั่น
+นี่คือคำขอจอง
 
 ห้ามตอบเฉพาะโปรโมชั่น
 ห้ามตอบเฉพาะราคา
@@ -1380,10 +1270,7 @@ app.post(
 ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
 
 กำหนดห้องเป็น:
-
 Podcast Studio
-
-ให้ใช้แบบฟอร์มการจองที่กำหนดไว้ในข้อมูล D-STATION
 
 `;
 
@@ -1394,11 +1281,9 @@ Podcast Studio
 
                     currentInstruction = `
 
-คำสั่งสำคัญสำหรับข้อความล่าสุด:
+ลูกค้าต้องการจอง Live Studio
 
-ลูกค้าต้องการ "จอง Live Studio"
-
-นี่คือคำขอจอง ไม่ใช่การถามโปรโมชั่น
+นี่คือคำขอจอง
 
 ห้ามตอบเฉพาะโปรโมชั่น
 ห้ามตอบเฉพาะราคา
@@ -1406,10 +1291,7 @@ Podcast Studio
 ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
 
 กำหนดห้องเป็น:
-
 Live Studio
-
-ให้ใช้แบบฟอร์มการจองที่กำหนดไว้ในข้อมูล D-STATION
 
 `;
 
@@ -1420,14 +1302,7 @@ Live Studio
 
                     currentInstruction = `
 
-คำสั่งสำคัญสำหรับข้อความล่าสุด:
-
 ลูกค้าต้องการจองห้องประชุม
-
-นี่คือคำขอจอง ไม่ใช่การถามโปรโมชั่น
-
-ห้ามตอบเฉพาะโปรโมชั่น
-ห้ามตอบเฉพาะราคา
 
 ต้องเข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
 
@@ -1443,14 +1318,9 @@ Live Studio
 
                     currentInstruction = `
 
-คำสั่งสำคัญสำหรับข้อความล่าสุด:
-
 ลูกค้าต้องการจองบริการของ D-STATION
 
 ให้เข้าสู่ขั้นตอนเก็บข้อมูลการจองทันที
-
-ห้ามตอบเฉพาะโปรโมชั่น
-ห้ามตอบเฉพาะราคา
 
 `;
                 }
@@ -1461,27 +1331,23 @@ Live Studio
 
                 currentInstruction = `
 
-คำสั่งสำคัญ:
-
 ลูกค้ากำลังอยู่ในขั้นตอนการจอง ${currentBookingMode}
 
-ให้ดำเนินการเก็บข้อมูลการจองต่อจากข้อมูลที่ลูกค้าเคยให้ไว้ในประวัติการสนทนา
-
-ห้ามเริ่มต้นโปรโมชั่นใหม่
-
-ห้ามวนกลับไปอธิบายโปรโมชั่น
+ให้ดำเนินการเก็บข้อมูลการจองต่อจากข้อมูลเดิม
 
 ห้ามถามข้อมูลที่ลูกค้าให้มาแล้ว
 
 ถามเฉพาะข้อมูลที่ยังขาด
 
-หากข้อมูลครบแล้ว ให้สรุปตามรูปแบบการจองที่กำหนดไว้
+หากข้อมูลครบแล้ว
+ให้สรุปข้อมูลการจองตามรูปแบบที่กำหนด
 
 `;
             }
 
+
             // ========================================
-            // ส่งให้ AI
+            // เรียก OpenAI
             // ========================================
 
             const response =
@@ -1513,8 +1379,9 @@ Live Studio
                     aiReply
             });
 
+
             // ========================================
-            // ตรวจข้อมูลการจองครบ
+            // ตรวจข้อมูลจองครบ
             // ========================================
 
             const bookingComplete =
@@ -1545,6 +1412,7 @@ Live Studio
                 bookingComplete
             );
 
+
             // ========================================
             // ฟังก์ชันดึงข้อมูล
             // ========================================
@@ -1567,6 +1435,7 @@ Live Studio
                     ? match[1].trim()
                     : "";
             }
+
 
             // ========================================
             // บันทึก Booking
@@ -1628,6 +1497,7 @@ Live Studio
                         "อีเมล"
                     );
 
+
                 // ========================================
                 // เวลา
                 // ========================================
@@ -1649,32 +1519,41 @@ Live Studio
                         `${timeMatch[3].padStart(2, "0")}:${timeMatch[4]}`;
                 }
 
+
                 // ========================================
-                // ระบุ Service
+                // Service
                 // ========================================
 
                 let service =
                     "ห้องประชุม";
 
                 if (
-                    /Podcast Studio/i.test(room) ||
-                    /พอดแคสต์/i.test(room)
+                    /Podcast Studio/i.test(
+                        room
+                    ) ||
+                    /พอดแคสต์/i.test(
+                        room
+                    )
                 ) {
 
                     service =
                         "Podcast Studio";
 
                 } else if (
-                    /Live Studio/i.test(room) ||
-                    /ไลฟ์/i.test(room)
+                    /Live Studio/i.test(
+                        room
+                    ) ||
+                    /ไลฟ์/i.test(
+                        room
+                    )
                 ) {
 
                     service =
                         "Live Studio";
                 }
 
+
                 // ========================================
-                // ถ้า AI ระบุห้องไม่ชัด
                 // ใช้ Booking Mode ช่วย
                 // ========================================
 
@@ -1695,8 +1574,9 @@ Live Studio
                         "Live Studio";
                 }
 
+
                 console.log(
-                    "ข้อมูลที่เตรียมบันทึก:",
+                    "ข้อมูลที่จะบันทึก:",
                     {
                         room,
                         service,
@@ -1705,16 +1585,13 @@ Live Studio
                         startTime,
                         endTime,
                         customerName,
-                        phone,
-                        position,
-                        company,
-                        address,
-                        email
+                        phone
                     }
                 );
 
+
                 // ========================================
-                // ป้องกันการบันทึกซ้ำ
+                // Booking Key
                 // ========================================
 
                 const bookingKey =
@@ -1725,8 +1602,9 @@ Live Studio
                         userId
                     ) === bookingKey;
 
+
                 // ========================================
-                // บันทึก Firebase
+                // บันทึก Firestore
                 // ========================================
 
                 if (
@@ -1799,31 +1677,26 @@ Live Studio
                     );
 
                     console.log(
-                        "บันทึกคำขอจองลง Firebase สำเร็จ:",
+                        "บันทึกคำขอจองสำเร็จ:",
                         bookingRef.id
                     );
 
                     bookingModes.delete(
                         userId
                     );
-
-                } else {
-
-                    console.log(
-                        "ข้อมูลไม่ครบ หรือบันทึกไปแล้ว"
-                    );
                 }
             }
 
+
             // ========================================
-            // เตรียมข้อความ LINE
+            // เตรียมข้อความตอบ LINE
             // ========================================
 
             const messages = [];
 
+
             // ========================================
-            // ถ้าเป็นคำถาม Podcast
-            // ส่งรูป
+            // Podcast
             // ========================================
 
             if (
@@ -1833,14 +1706,10 @@ Live Studio
                 messages.push(
                     createImageMessage(
                         "podcast"
-                    );
-            }
+                    )
+                );
 
-            // ========================================
-            // Live
-            // ========================================
-
-            else if (
+            } else if (
                 isLiveQuestion
             ) {
 
@@ -1848,14 +1717,10 @@ Live Studio
                     createImageMessage(
                         "live"
                     )
+
                 );
-            }
 
-            // ========================================
-            // ห้องประชุม
-            // ========================================
-
-            else if (
+            } else if (
                 isMeetingRoomQuestion
             ) {
 
@@ -1863,14 +1728,10 @@ Live Studio
                     createImageMessage(
                         "meeting"
                     )
+
                 );
-            }
 
-            // ========================================
-            // Co-working
-            // ========================================
-
-            else if (
+            } else if (
                 isCoworkingQuestion
             ) {
 
@@ -1881,8 +1742,9 @@ Live Studio
                 );
             }
 
+
             // ========================================
-            // ข้อความ AI
+            // AI Text
             // ========================================
 
             messages.push({
@@ -1891,17 +1753,9 @@ Live Studio
                     aiReply
             });
 
-            // ========================================
-            // จำกัดสูงสุด 5 messages
-            // ========================================
-
-            console.log(
-                "จำนวนข้อความที่จะส่ง LINE:",
-                messages.length
-            );
 
             // ========================================
-            // ส่งกลับ LINE
+            // ส่ง LINE
             // ========================================
 
             await replyToLine(
@@ -1918,7 +1772,7 @@ Live Studio
             );
 
             console.error(
-                "WEBHOOK ERROR:"
+                "WEBHOOK ERROR"
             );
 
             console.error(
@@ -1934,14 +1788,16 @@ Live Studio
     }
 );
 
+
 // ========================================
-// Start Server
+// START SERVER
 // ========================================
 
 app.listen(
     PORT,
     "0.0.0.0",
     () => {
+
         console.log(
             `Server running on port ${PORT}`
         );
