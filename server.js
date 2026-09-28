@@ -915,7 +915,7 @@ app.post(
                     .test(userMessage);
 
             const isPodcastQuestion =
-    /พอดแคสต์|podcast|พอคแคสต์|พอตแคสต์|พอตแคส|พอดแคด|ห้องอัด/i
+    /พอดแคสต์|พอดแคส|podcast|พอคแคสต์|พอตแคสต์|พอตแคส|พอดแคด|ห้องอัด/i
         .test(userMessage);
 
             const isLiveQuestion =
@@ -939,7 +939,7 @@ app.post(
                     .test(userMessage);
 
             const isGeneralMenuQuestion =
-                /ขอดูเมนู|ขอเมนู|ดูเมนู|เมนูมีอะไร|เมนูทั้งหมด/i
+                /ขอดูเมนู|เมนู|ขอเมนู|ดูเมนู|เมนูมีอะไร|เมนูทั้งหมด/i
                     .test(userMessage);
 
             const isFoodAndDrinkQuestion =
