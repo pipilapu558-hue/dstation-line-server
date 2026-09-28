@@ -915,8 +915,8 @@ app.post(
                     .test(userMessage);
 
             const isPodcastQuestion =
-                /พอดแคสต์|podcast|พอคแคสต์|ห้องอัด|ห้องพอดแคสต์/i
-                    .test(userMessage);
+    /พอดแคสต์|podcast|พอคแคสต์|ห้องอัด|ห้องพอดแคสต์|สนใจ.*พอดแคสต์|สนใจ.*podcast/i
+        .test(userMessage);
 
             const isLiveQuestion =
                 /ห้องไลฟ์|ไลฟ์สด|live studio|live|ไลฟ์/i
